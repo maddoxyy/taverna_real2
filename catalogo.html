@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content="Taverna - Catálogo completo de bebidas para sua adega">
+    <title>Taverna | Catálogo de Bebidas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cinza-escuro: #1a2029;
+            --dourado: #d4af37;
+            --laranja: #c86b3d;
+            --cinza-claro: #e0e0e0;
+            --marrom-escuro: #2a211c;
+            --nav-bg-default: rgba(26, 32, 41, 0.9);
+            --nav-bg-scrolled: #15191f;
+            --nav-link-default: var(--cinza-claro);
+            --nav-link-scrolled: var(--dourado);
+            --card-bg: rgba(42, 33, 28, 0.85);
+            --card-shadow: rgba(0, 0, 0, 0.6);
+            --transition-slow: 0.5s ease;
+            --transition-fast: 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Raleway', sans-serif;
+            background: linear-gradient(to right, var(--cinza-escuro), #14181f);
+            color: var(--cinza-claro);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            line-height: 1.6;
+            padding: 0;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* Efeito de partículas animadas */
+        .particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(212, 175, 55, 0.15);
+            border-radius: 50%;
+            opacity: 0;
+            animation: floatParticle 15s infinite linear;
+        }
+
+        @keyframes floatParticle {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.4;
+            }
+            90% {
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(-100px) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        /* Overlay para melhor contraste */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 30%, rgba(20, 24, 31, 0.95) 90%);
+            z-index: -1;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 5%;
+            background-color: var(--nav-bg-default);
+            transition: all var(--transition-fast);
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+        }
+
+        header.scrolled {
+            background-color: var(--nav-bg-scrolled);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            padding: 15px 5%;
+        }
+
+        .logo {
+            height: 70px;
+            transition: all var(--transition-fast);
+            filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.5));
+        }
+
+        header.scrolled .logo {
+            height: 60px;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+        }
+
+        nav a {
+            color: var(--nav-link-default);
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+            position: relative;
+            font-size: 1.1rem;
+        }
+
+        header.scrolled nav a {
+            color: var(--nav-link-scrolled);
+        }
+
+        nav a:not(:last-child):after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--dourado);
+            transition: width var(--transition-fast);
+        }
+
+        nav a:hover:after {
+            width: 100%;
+        }
+
+        nav a:hover {
+            color: var(--dourado);
+        }
+
+        .cart-icon {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--laranja);
+            color: white;
+            font-size: 0.7rem;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .page-title {
+            margin-top: 140px;
+            text-align: center;
+            padding: 20px;
+            width: 100%;
+        }
+
+        .page-title h1 {
+            font-size: 3.5rem;
+            background: linear-gradient(90deg, var(--dourado), var(--laranja));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            animation: fadeDown 1s ease-in-out;
+        }
+
+        .page-title p {
+            font-size: 1.2rem;
+            color: var(--cinza-claro);
+            max-width: 600px;
+            margin: 0 auto;
+            font-weight: 300;
+        }
+
+        .catalog-container {
+            width: 100%;
+            max-width: 1400px;
+            padding: 40px 5%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .filtro-container {
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+
+        .filtro-container input {
+            width: 100%;
+            padding: 16px 20px;
+            font-size: 1.1em;
+            border-radius: 30px;
+            border: none;
+            outline: none;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--cinza-claro);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all var(--transition-fast);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            padding-left: 50px;
+        }
+
+        .filtro-container:before {
+            content: "\f002";
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--dourado);
+            z-index: 2;
+        }
+
+        .filtro-container input:focus {
+            background-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            border-color: rgba(212, 175, 55, 0.3);
+        }
+
+        .filtro-container input::placeholder {
+            color: rgba(224, 224, 224, 0.7);
+        }
+
+        .categoria-lista {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            justify-content: center;
+            width: 100%;
+            margin-bottom: 50px;
+        }
+
+        .categoria-card {
+            background: linear-gradient(145deg, var(--card-bg), #352a24);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px var(--card-shadow);
+            cursor: pointer;
+            position: relative;
+            transition: all var(--transition-fast);
+            height: 280px;
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            animation: fadeUp 0.8s ease both;
+        }
+
+        .categoria-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 20px 40px var(--card-shadow);
+            border-color: rgba(212, 175, 55, 0.3);
+        }
+
+        .categoria-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform var(--transition-slow);
+        }
+
+        .categoria-card:hover img {
+            transform: scale(1.15);
+        }
+
+        .categoria-nome {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+            color: var(--dourado);
+            font-weight: 700;
+            font-size: 1.4rem;
+            padding: 20px;
+            text-align: left;
+            user-select: none;
+        }
+
+        .categoria-count {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--dourado);
+            color: var(--marrom-escuro);
+            font-size: 0.9rem;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Botão Flutuante */
+        .float-btn {
+            position: fixed;
+            right: 30px;
+            bottom: 30px;
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(to right, var(--dourado), var(--laranja));
+            color: var(--cinza-escuro);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+            transition: all var(--transition-fast);
+            z-index: 999;
+            text-decoration: none;
+        }
+
+        .float-btn:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .float-btn::after {
+            content: "Adicionar nova categoria";
+            position: absolute;
+            right: 85px;
+            white-space: nowrap;
+            background: var(--cinza-escuro);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            opacity: 0;
+            pointer-events: none;
+            transition: all var(--transition-fast);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .float-btn:hover::after {
+            opacity: 1;
+            right: 95px;
+        }
+
+        .footer {
+            background-color: #15181f;
+            color: #d9d9d9;
+            padding: 80px 5% 30px;
+            width: 100%;
+            margin-top: 60px;
+            border-top: 1px solid rgba(212, 175, 55, 0.1);
+        }
+
+        .footer-container {
+            display: flex;
+            flex-wrap: wrap;
+            max-width: 1300px;
+            margin: auto;
+            justify-content: space-between;
+            gap: 50px;
+        }
+
+        .footer-col {
+            flex: 1 1 250px;
+        }
+
+        .footer h3 {
+            color: var(--dourado);
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer h3:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background: var(--laranja);
+        }
+
+        .footer p, .footer li {
+            font-size: 1rem;
+            line-height: 1.8;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .footer ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer a {
+            color: #d9d9d9;
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        .footer a:hover {
+            color: var(--laranja);
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-icons a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all var(--transition-fast);
+        }
+
+        .social-icons a:hover {
+            background: var(--dourado);
+            transform: translateY(-3px);
+        }
+
+        .social-icons a:hover img {
+            filter: brightness(0) saturate(100%);
+        }
+
+        .social-icons img {
+            width: 20px;
+            height: 20px;
+            filter: brightness(0) invert(1);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 60px;
+            padding-top: 40px;
+            font-size: 0.9rem;
+            color: #999;
+        }
+
+        .footer-bottom h1 {
+            font-size: 1rem;
+            margin-bottom: 15px;
+            color: var(--cinza-claro);
+            font-weight: 400;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsividade */
+        @media (max-width: 1200px) {
+            .page-title h1 {
+                font-size: 3rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .categoria-lista {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+            
+            nav a {
+                margin: 0 10px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 15px 20px;
+            }
+            
+            .logo {
+                height: 60px;
+            }
+            
+            .page-title {
+                margin-top: 120px;
+                padding: 15px;
+            }
+            
+            .page-title h1 {
+                font-size: 2.5rem;
+            }
+            
+            .page-title p {
+                font-size: 1.1rem;
+            }
+            
+            .catalog-container {
+                padding: 30px 20px;
+            }
+            
+            .categoria-card {
+                height: 250px;
+            }
+            
+            .float-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 1.8em;
+                right: 20px;
+                bottom: 20px;
+            }
+            
+            .float-btn::after {
+                font-size: 0.8em;
+                right: 70px;
+                white-space: normal;
+                width: 140px;
+            }
+            
+            .float-btn:hover::after {
+                right: 80px;
+            }
+            
+            .footer-container {
+                gap: 30px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            header {
+                flex-direction: column;
+                padding: 15px;
+            }
+            
+            header.scrolled {
+                padding: 10px 15px;
+            }
+            
+            nav {
+                margin-top: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            nav a {
+                margin: 5px 10px;
+                font-size: 0.9rem;
+            }
+            
+            .page-title h1 {
+                font-size: 2.2rem;
+            }
+            
+            .categoria-lista {
+                grid-template-columns: 1fr;
+            }
+            
+            .float-btn::after {
+                display: none;
+            }
+        }
+
+        /* Loading state */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            width: 100%;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(212, 175, 55, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--dourado);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            text-align: center;
+            color: var(--laranja);
+            padding: 20px;
+            font-size: 1.2rem;
+        }
+
+        .retry-button {
+            background: var(--dourado);
+            color: var(--cinza-escuro);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            transition: all var(--transition-fast);
+        }
+
+        .retry-button:hover {
+            background: var(--laranja);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="particles-container" id="particles-container"></div>
+    
+    <div class="overlay"></div>
+
+    <header>
+        <img src="taverna logo v3.svg" alt="Logo Taverna" class="logo" />
+        <nav>
+            <a href="welcome.html">Início</a>
+            <a href="catalogo.html">Catálogo</a>
+            <a href="estoque.html">Estoque</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="perfil.html">Perfil</a>
+            <a href="carrinho.html" title="Meu Carrinho" class="cart-icon">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count">0</span>
+            </a>
+        </nav>
+    </header>
+
+    <div class="page-title">
+        <h1>Catálogo da Adega</h1>
+        <p>Explore nossa seleção premium de bebidas cuidadosamente selecionadas</p>
+    </div>
+
+    <div class="catalog-container">
+        <div class="filtro-container">
+            <input type="text" id="filtro" placeholder="Buscar categoria...">
+        </div>
+
+        <div class="categoria-lista" id="categoriaLista">
+            <div class="loading">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <a href="cadastrocatalogo.html" class="float-btn" title="Adicionar nova categoria">+</a>
+
+    <footer class="footer">
+        <div class="footer-container">
+            
+            
+            <div class="footer-col">
+                <h3>Sobre a Taverna</h3>
+                <p>
+                    A Taverna é uma plataforma moderna para gerenciamento de adegas, unindo tradição e tecnologia. Organize, catalogue e controle sua coleção de bebidas com elegância e praticidade.
+                </p>
+            </div>
+
+            <div class="footer-col">
+                <h3>Links Rápidos</h3>
+                <ul>
+                    <li><a href="welcome.html">Início</a></li>
+                    <li><a href="catalogo.html">Catálogo</a></li>
+                    <li><a href="estoque.html">Estoque</a></li>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3>Siga-nos</h3>
+                <div class="social-icons">
+                    <a href="#"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/instagram.svg" alt="Instagram"></a>
+                    <a href="#"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/facebook.svg" alt="Facebook"></a>
+                    <a href="#"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/twitter.svg" alt="Twitter"></a>
+                    <a href="#"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/github.svg" alt="GitHub"></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <h1>BEBA COM MODERAÇÃO. O CONTEÚDO DESSA PÁGINA É DESTINADO PARA MAIORES DE 18 ANOS</h1>
+            <p>&copy; 2025 Taverna. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:8000/api/catalogos';
+        
+        // Função para buscar categorias via AJAX
+        function fetchCategorias() {
+            // Mostrar estado de carregamento
+            document.getElementById('categoriaLista').innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            `;
+            
+            // Fazer requisição AJAX
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', API_URL, true);
+            
+            xhr.onload = function() {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try {
+                        const categorias = JSON.parse(xhr.responseText);
+                        renderCategorias(categorias);
+                    } catch (error) {
+                        showError('Erro ao processar os dados. Tente novamente.');
+                    }
+                } else {
+                    showError('Erro ao carregar categorias. Tente novamente.');
+                }
+            };
+            
+            xhr.onerror = function() {
+                showError('Erro de conexão. Verifique sua internet e tente novamente.');
+            };
+            
+            xhr.timeout = 10000; // 10 segundos
+            xhr.ontimeout = function() {
+                showError('Tempo de conexão esgotado. Tente novamente.');
+            };
+            
+            xhr.send();
+        }
+        
+        // Função para renderizar as categorias
+        function renderCategorias(categorias) {
+            const container = document.getElementById('categoriaLista');
+            container.innerHTML = ''; // Limpar o spinner
+            
+            if (!categorias || categorias.length === 0) {
+                container.innerHTML = `
+                    <div class="error-message">
+                        Nenhuma categoria encontrada.
+                    </div>
+                `;
+                return;
+            }
+            
+            categorias.forEach(categoria => {
+                const card = document.createElement('div');
+                card.className = 'categoria-card';
+                card.innerHTML = `
+                    <img src="${categoria.imagem}" alt="${categoria.nome}" />
+                    <div class="categoria-count">${categoria.quantidade}</div>
+                    <div class="categoria-nome">${categoria.nome}</div>
+                `;
+                
+                // Adicionando o evento de clique para redirecionar com o ID
+                card.addEventListener('click', () => {
+                    window.location.href = `catalogoproduto.html?id=${categoria.id}`;
+                });
+                
+                container.appendChild(card);
+            });
+            
+            setupFilter(); // Configurar o filtro após renderizar as categorias
+        }
+        
+        // Função para mostrar erro
+        function showError(message) {
+            document.getElementById('categoriaLista').innerHTML = `
+                <div class="error-message">
+                    ${message}
+                    <br>
+                    <button class="retry-button" onclick="fetchCategorias()">Tentar Novamente</button>
+                </div>
+            `;
+        }
+        
+        // Configurar filtro de categorias
+        function setupFilter() {
+            const filtro = document.getElementById('filtro');
+            const categorias = document.querySelectorAll('.categoria-card');
+            
+            filtro.addEventListener('input', () => {
+                const termo = filtro.value.toLowerCase();
+                categorias.forEach(card => {
+                    const nome = card.querySelector('.categoria-nome').textContent.toLowerCase();
+                    card.style.display = nome.includes(termo) ? 'block' : 'none';
+                });
+            });
+        }
+        
+        // Efeito de partículas animadas
+        function createParticles() {
+            const container = document.getElementById('particles-container');
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Tamanho aleatório
+                const size = Math.random() * 20 + 5;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // Posição inicial aleatória
+                const posX = Math.random() * 100;
+                particle.style.left = `${posX}%`;
+                
+                // Atraso aleatório na animação
+                const delay = Math.random() * 15;
+                particle.style.animationDelay = `${delay}s`;
+                
+                container.appendChild(particle);
+            }
+        }
+        
+        // Header scroll effect
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+        
+        // Inicializar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            fetchCategorias(); // Buscar categorias quando a página carregar
+        });
+
+        function getCookie(nome) {
+            const cookies = document.cookie.split(";");
+            for (let i = 0; i < cookies.length; i++) {
+                const c = cookies[i].trim();
+                if (c.indexOf(nome + "=") === 0) {
+                    return c.substring((nome + "=").length, c.length);
+                }
+            }
+            return null;
+        }
+
+        // Função para exibir todos os cookies na página
+        function displayCookies() {
+            const cookieContainer = document.getElementById("cookieContainer");
+            const cookies = document.cookie.split(";");
+            
+            if (cookies.length === 0 || (cookies.length === 1 && cookies[0] === "")) {
+                cookieContainer.innerHTML = "<div class='cookie-item'>Nenhum cookie encontrado.</div>";
+                return;
+            }
+            
+            cookieContainer.innerHTML = "";
+            cookies.forEach(cookie => {
+                const cookieItem = document.createElement("div");
+                cookieItem.className = "cookie-item";
+                cookieItem.textContent = cookie.trim();
+                cookieContainer.appendChild(cookieItem);
+            });
+        }
+
+        // Função principal para verificar autenticação
+        function checkAuth() {
+            console.clear();
+            console.log("=== VERIFICAÇÃO DE TOKEN E COOKIES ===");
+            
+            // Recupera cookies
+            const userId = getCookie("user_id");
+            const token = getCookie("token");
+            
+            // Exibe no console
+            console.log("🔍 Cookies recuperados:");
+            console.log("user_id:", userId);
+            console.log("token:", token);
+            
+            // Exibe todos os cookies disponíveis
+            console.log("🍪 Todos os cookies:", document.cookie);
+            
+            if (token) {
+                console.log("✅ Token encontrado! Usuário potencialmente autenticado.");
+            } else {
+                console.log("❌ Nenhum token encontrado. Usuário não autenticado.");
+            }
+            
+            // Atualiza a exibição de cookies na página
+            displayCookies();
+        }
+
+        // Executa automaticamente quando a página carrega
+        window.onload = function() {
+            console.log("Página carregada. Use o botão para verificar token e cookies.");
+            displayCookies();
+        };
+    </script>
+</body>
+</html>

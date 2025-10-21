@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Produto - Taverna</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Incluindo o jQuery Validation Plugin -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/additional-methods.min.js"></script>
+    <style>
+        :root {
+            --cinza-escuro: #313c49;
+            --dourado: #ffe08c; 
+            --laranja: #cf8e60; 
+            --cinza-claro: #d9d9d9;
+            --nav-bg-default: transparent;
+            --nav-bg-scrolled: #222831;
+            --nav-link-default: var(--cinza-claro);
+            --nav-link-scrolled: var(--dourado);
+            --card-bg: #3f4a65;
+            --card-shadow: rgba(0,0,0,0.5);
+            --success: #4caf50;
+            --error: #f44336;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(to right, var(--cinza-escuro), #1f2027);
+            color: var(--cinza-claro);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background-color: var(--nav-bg-default);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            z-index: 1000;
+        }
+
+        header.scrolled {
+            background-color: var(--nav-bg-scrolled);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.7);
+        }
+
+        .logo {
+            height: 100px;
+            transform: scale(1.3);
+            transform-origin: left;
+            transition: filter 0.3s;
+        }
+
+        header.scrolled .logo {
+            filter: brightness(0.9);
+        }
+
+        nav a {
+            color: var(--nav-link-default);
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        header.scrolled nav a {
+            color: var(--nav-link-scrolled);
+        }
+
+        nav a:hover {
+            color: var(--dourado);
+        }
+
+        .main-content {
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 140px;
+            padding: 40px 20px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 4px 12px var(--card-shadow);
+            margin: 0 auto;
+            max-width: 800px;
+        }
+
+        .card h2 {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            color: var(--dourado);
+            text-align: center;
+            background: linear-gradient(90deg, var(--dourado), var(--laranja));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dourado);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: #2c2c2c;
+            border: 1px solid #4a5568;
+            border-radius: 8px;
+            color: var(--cinza-claro);
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--dourado);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 14px 28px;
+            background: var(--dourado);
+            color: var(--cinza-escuro);
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            text-decoration: none;
+            text-align: center;
+            width: 100%;
+            font-size: 1.1em;
+        }
+
+        .btn:hover {
+            background: var(--laranja);
+        }
+
+        .btn:disabled {
+            background: #8a8a8a;
+            cursor: not-allowed;
+        }
+
+        .file-input-container {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input {
+            position: absolute;
+            font-size: 100px;
+            opacity: 0;
+            right: 0;
+            top: 0;
+            cursor: pointer;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 12px 15px;
+            background-color: #2c2c2c;
+            border: 1px solid #4a5568;
+            border-radius: 8px;
+            color: var(--cinza-claro);
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .file-input-label:hover {
+            border-color: var(--dourado);
+        }
+
+        .image-preview {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .image-preview img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            border: 2px solid var(--dourado);
+            display: none;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .error {
+            color: #f44336;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: var(--dourado);
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .footer {
+            background-color: #1c1e24;
+            color: #d9d9d9;
+            padding: 60px 20px 30px;
+            width: 100%;
+            margin-top: 60px;
+        }
+
+        .footer-container {
+            display: flex;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin: auto;
+            justify-content: space-between;
+            gap: 40px;
+        }
+
+        .footer-col {
+            flex: 1 1 220px;
+        }
+
+        .footer h3 {
+            color: var(--dourado);
+            margin-bottom: 20px;
+            font-size: 1.4em;
+        }
+
+        .footer p, .footer li {
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .footer ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer a {
+            color: #d9d9d9;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer a:hover {
+            color: var(--laranja);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            border-top: 1px solid #333;
+            margin-top: 40px;
+            padding-top: 20px;
+            font-size: 0.85em;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 15px 20px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            nav {
+                margin-top: 15px;
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+            }
+
+            .main-content {
+                margin-top: 180px;
+            }
+
+            .card {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="taverna logo v3.svg" alt="Logo Taverna" class="logo" />
+        <nav>
+            <a href="welcome.html">Início</a>
+            <a href="catalogo.html">Catálogo</a>
+            <a href="estoque.html">Estoque</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="perfil.html">Perfil</a>
+        </nav>
+    </header>
+
+    <div class="main-content">
+        <div class="card">
+            <h2>Cadastrar Novo Produto</h2>
+            
+            <div id="alert-success" class="alert alert-success"></div>
+            <div id="alert-error" class="alert alert-error"></div>
+            
+            <form id="product-form">
+                <div class="form-group">
+                    <label for="nome">Nome do Produto</label>
+                    <input type="text" id="nome" name="nome" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="descricao">Descrição</label>
+                    <textarea id="descricao" name="descricao" class="form-control" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="preco_varejo">Preço Varejo (R$)</label>
+                    <input type="number" step="0.01" id="preco_varejo" name="preco_varejo" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="preco_atacado">Preço Atacado (R$)</label>
+                    <input type="number" step="0.01" id="preco_atacado" name="preco_atacado" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="custo">Custo (R$)</label>
+                    <input type="number" step="0.01" id="custo" name="custo" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="quantidade">Quantidade em Estoque</label>
+                    <input type="number" id="quantidade" name="quantidade" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="catalogo_id">Catálogo</label>
+                    <select id="catalogo_id" name="catalogo_id" class="form-control" required>
+                        <option value="">-- Carregando catálogos --</option>
+                    </select>
+                    <div id="loading-catalogos" class="loading" style="display: inline-block; margin-left: 10px;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="imagem">Imagem do Produto</label>
+                    <div class="file-input-container">
+                        <label for="imagem" class="file-input-label">
+                            Selecione uma imagem
+                        </label>
+                        <input type="file" id="imagem" name="imagem" class="file-input" accept="image/*" required>
+                    </div>
+                    <div class="image-preview">
+                        <img id="image-preview" src="#" alt="Preview da imagem">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn" id="submit-btn">Cadastrar Produto</button>
+            </form>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-col">
+                <h3>Sobre a Taverna</h3>
+                <p>
+                    A Taverna é uma plataforma moderna para gerenciamento de adegas, unindo tradição e tecnologia. Organize, catalogue e controle sua coleção de bebidas com elegância e praticidade.
+                </p>
+            </div>
+
+            <div class="footer-col">
+                <h3>Links Rápidos</h3>
+                <ul>
+                    <li><a href="welcome.html">Início</a></li>
+                    <li><a href="catalogo.html">Catálogo</a></li>
+                    <li><a href="estoque.html">Estoque</a></li>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3>Contato</h3>
+                <p>Email: contato@taverna.com</p>
+                <p>Telefone: (11) 99999-9999</p>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2023 Taverna - Todos os direitos reservados</p>
+        </div>
+    </footer>
+
+    <script>
+        $(document).ready(function() {
+            // Carregar categorias (catálogos) via AJAX
+            function carregarCatalogos() {
+                $('#loading-catalogos').show();
+                
+                $.ajax({
+                    url: 'http://127.0.0.1:8000/api/catalogos',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        console.log('Resposta da API de catálogos:', response);
+                        
+                        const select = $('#catalogo_id');
+                        select.empty();
+                        
+                        if (response && response.length > 0) {
+                            select.append('<option value="">-- Selecione um catálogo --</option>');
+                            
+                            // Verificar se a resposta é um array ou um objeto com propriedade data
+                            const catalogos = Array.isArray(response) ? response : (response.data || []);
+                            
+                            catalogos.forEach(function(catalogo) {
+                                select.append($('<option>', {
+                                    value: catalogo.id,
+                                    text: catalogo.nome
+                                }));
+                            });
+                        } else if (response && response.data && response.data.length > 0) {
+                            select.append('<option value="">-- Selecione um catálogo --</option>');
+                            
+                            response.data.forEach(function(catalogo) {
+                                select.append($('<option>', {
+                                    value: catalogo.id,
+                                    text: catalogo.nome
+                                }));
+                            });
+                        } else {
+                            select.append('<option value="">-- Nenhum catálogo disponível --</option>');
+                            $('#alert-error').text('Nenhum catálogo encontrado. Cadastre um catálogo primeiro.').show();
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Erro ao carregar catálogos:', error, xhr);
+                        $('#catalogo_id').html('<option value="">-- Erro ao carregar catálogos --</option>');
+                        
+                        // Tentar uma URL alternativa comum para APIs Laravel
+                        setTimeout(function() {
+                            $.ajax({
+                                url: '/api/catalogo',
+                                type: 'GET',
+                                dataType: 'json',
+                                success: function(responseAlt) {
+                                    console.log('Resposta alternativa da API:', responseAlt);
+                                    const select = $('#catalogo_id');
+                                    select.empty();
+                                    select.append('<option value="">-- Selecione um catálogo --</option>');
+                                    
+                                    const catalogos = Array.isArray(responseAlt) ? responseAlt : (responseAlt.data || []);
+                                    
+                                    catalogos.forEach(function(catalogo) {
+                                        select.append($('<option>', {
+                                            value: catalogo.id,
+                                            text: catalogo.nome
+                                        }));
+                                    });
+                                },
+                                error: function() {
+                                    $('#alert-error').html('Erro ao carregar catálogos. Verifique se existem catálogos cadastrados. <a href="cadastro_categoria.html">Cadastrar catálogo</a>').show();
+                                }
+                            });
+                        }, 1000);
+                    },
+                    complete: function() {
+                        $('#loading-catalogos').hide();
+                    }
+                });
+            }
+            
+            // Carregar catálogos ao iniciar a página
+            carregarCatalogos();
+           
+            // Preview da imagem
+            $('#imagem').change(function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#image-preview').attr('src', e.target.result).show();
+                        $('.file-input-label').text(file.name);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Validação do formulário
+            $('#product-form').validate({
+                rules: {
+                    nome: {
+                        required: true,
+                        minlength: 2,
+                        maxlength: 255
+                    },
+                    descricao: {
+                        required: true,
+                        minlength: 10
+                    },
+                    preco_varejo: {
+                        required: true,
+                        number: true,
+                        min: 0.01
+                    },
+                    preco_atacado: {
+                        required: true,
+                        number: true,
+                        min: 0.01
+                    },
+                    custo: {
+                        required: true,
+                        number: true,
+                        min: 0.01
+                    },
+                    quantidade: {
+                        required: true,
+                        digits: true,
+                        min: 0
+                    },
+                    catalogo_id: {
+                        required: true
+                    },
+                    imagem: {
+                        required: true,
+                        accept: "image/*"
+                    }
+                },
+                messages: {
+                    nome: {
+                        required: "Por favor, informe o nome do produto",
+                        minlength: "O nome deve ter pelo menos 2 caracteres",
+                        maxlength: "O nome não pode ter mais de 255 caracteres"
+                    },
+                    descricao: {
+                        required: "Por favor, informe a descrição do produto",
+                        minlength: "A descrição deve ter pelo menos 10 caracteres"
+                    },
+                    preco_varejo: {
+                        required: "Por favor, informe o preço de varejo",
+                        number: "Por favor, informe um valor numérico válido",
+                        min: "O preço deve ser maior que zero"
+                    },
+                    preco_atacado: {
+                        required: "Por favor, informe o preço de atacado",
+                        number: "Por favor, informe um valor numérico válido",
+                        min: "O preço deve ser maior que zero"
+                    },
+                    custo: {
+                        required: "Por favor, informe o custo do produto",
+                        number: "Por favor, informe um valor numérico válido",
+                        min: "O custo deve ser maior que zero"
+                    },
+                    quantidade: {
+                        required: "Por favor, informe a quantidade em estoque",
+                        digits: "A quantidade deve ser um número inteiro",
+                        min: "A quantidade não pode ser negativa"
+                    },
+                    catalogo_id: {
+                        required: "Por favor, selecione um catálogo"
+                    },
+                    imagem: {
+                        required: "Por favor, selecione uma imagem",
+                        accept: "Por favor, selecione um arquivo de imagem válido"
+                    }
+                },
+                errorPlacement: function(error, element) {
+                    if (element.attr("name") === "imagem") {
+                        error.insertAfter($('.file-input-container'));
+                    } else {
+                        error.insertAfter(element);
+                    }
+                },
+                submitHandler: function(form) {
+                    cadastrarProduto(form);
+                    return false;
+                }
+            });
+
+            // Função para cadastrar produto
+            function cadastrarProduto(form) {
+                const submitBtn = $('#submit-btn');
+                const originalText = submitBtn.text();
+                
+                // Desativar botão e mostrar loading
+                submitBtn.prop('disabled', true).text('Cadastrando...');
+                
+                // Ocultar alertas anteriores
+                $('#alert-success, #alert-error').hide();
+                
+                // Criar FormData para enviar dados do formulário (incluindo a imagem)
+                const formData = new FormData();
+                formData.append('nome', $('#nome').val());
+                formData.append('descricao', $('#descricao').val());
+                formData.append('preco_varejo', $('#preco_varejo').val());
+                formData.append('preco_atacado', $('#preco_atacado').val());
+                formData.append('custo', $('#custo').val());
+                formData.append('quantidade', $('#quantidade').val());
+                formData.append('catalogo_id', $('#catalogo_id').val());
+                formData.append('imagem', $('#imagem')[0].files[0]);
+                
+                // Calcular lucro automaticamente (preço varejo - custo)
+                const lucro = parseFloat($('#preco_varejo').val()) - parseFloat($('#custo').val());
+                formData.append('lucro', lucro.toFixed(2));
+                
+                // Enviar requisição AJAX
+                $.ajax({
+                    url: 'http://127.0.0.1:8000/api/produtos', // Rota da API para produtos
+                    type: 'POST',
+                    data: formData,
+                    processData: false, // Necessário para FormData
+                    contentType: false, // Necessário para FormData
+                    dataType: 'json',
+                    success: function(response) {
+                        // Sucesso
+                        if (response.success || response.id) {
+                            // Mostrar mensagem de sucesso
+                            $('#alert-success').text(response.message || 'Produto cadastrado com sucesso!').show();
+                            
+                            // SweetAlert de sucesso
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Sucesso!',
+                                text: response.message || 'Produto cadastrado com sucesso!',
+                                confirmButtonColor: '#4CAF50'
+                            });
+                            
+                            // Limpar formulário
+                            form.reset();
+                            $('#image-preview').hide();
+                            $('.file-input-label').text('Selecione uma imagem');
+                            
+                            // Redirecionar para estoque após 2 segundos
+                            setTimeout(() => {
+                                window.location.href = 'estoque.html';
+                            }, 2000);
+                        } else {
+                            // Erro no servidor
+                            $('#alert-error').text(response.message || 'Erro ao cadastrar produto').show();
+                            
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Erro',
+                                text: response.message || 'Erro ao cadastrar produto',
+                                confirmButtonColor: '#f44336'
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        // Tratar erros
+                        let errorMessage = 'Erro ao conectar com o servidor';
+                        
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        } else if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
+                            // Erros de validação do Laravel
+                            const errors = xhr.responseJSON.errors;
+                            errorMessage = '';
+                            
+                            for (const field in errors) {
+                                errorMessage += errors[field].join(', ') + '\n';
+                            }
+                        } else if (xhr.status === 413) {
+                            errorMessage = 'A imagem é muito grande. Por favor, selecione uma imagem menor.';
+                        } else if (xhr.status === 0) {
+                            errorMessage = 'Erro de conexão. Verifique se o servidor está rodando.';
+                        }
+                        
+                        // Mostrar mensagem de erro
+                        $('#alert-error').text(errorMessage).show();
+                        
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erro',
+                            text: errorMessage,
+                            confirmButtonColor: '#f44336'
+                        });
+                    },
+                    complete: function() {
+                        // Reativar botão
+                        submitBtn.prop('disabled', false).text(originalText);
+                    }
+                });
+            }
+        });
+
+        // Efeito de scroll no header
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        function getCookie(nome) {
+            const cookies = document.cookie.split(";");
+            for (let i = 0; i < cookies.length; i++) {
+                const c = cookies[i].trim();
+                if (c.indexOf(nome + "=") === 0) {
+                    return c.substring((nome + "=").length, c.length);
+                }
+            }
+            return null;
+        }
+
+        // Função para exibir todos os cookies na página
+        function displayCookies() {
+            const cookieContainer = document.getElementById("cookieContainer");
+            const cookies = document.cookie.split(";");
+            
+            if (cookies.length === 0 || (cookies.length === 1 && cookies[0] === "")) {
+                cookieContainer.innerHTML = "<div class='cookie-item'>Nenhum cookie encontrado.</div>";
+                return;
+            }
+            
+            cookieContainer.innerHTML = "";
+            cookies.forEach(cookie => {
+                const cookieItem = document.createElement("div");
+                cookieItem.className = "cookie-item";
+                cookieItem.textContent = cookie.trim();
+                cookieContainer.appendChild(cookieItem);
+            });
+        }
+
+        // Função principal para verificar autenticação
+        function checkAuth() {
+            console.clear();
+            console.log("=== VERIFICAÇÃO DE TOKEN E COOKIES ===");
+            
+            // Recupera cookies
+            const userId = getCookie("user_id");
+            const token = getCookie("token");
+            
+            // Exibe no console
+            console.log("🔍 Cookies recuperados:");
+            console.log("user_id:", userId);
+            console.log("token:", token);
+            
+            // Exibe todos os cookies disponíveis
+            console.log("🍪 Todos os cookies:", document.cookie);
+            
+            if (token) {
+                console.log("✅ Token encontrado! Usuário potencialmente autenticado.");
+            } else {
+                console.log("❌ Nenhum token encontrado. Usuário não autenticado.");
+            }
+            
+            // Atualiza a exibição de cookies na página
+            displayCookies();
+        }
+
+        // Executa automaticamente quando a página carrega
+        window.onload = function() {
+            console.log("Página carregada. Use o botão para verificar token e cookies.");
+            displayCookies();
+        };
+    </script>
+</body>
+</html>

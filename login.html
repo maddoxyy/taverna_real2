@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login | Taverna</title>
+  <style>
+    :root {
+      --dourado: #f2a900;
+      --laranja: #f4a261;
+      --cinza-escuro: #1f2027;
+      --cinza-medio: #2c2d31;
+      --vidro: rgba(44, 45, 49, 0.7);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at center, #1f2027 0%, #131417 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: white;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 430px;
+      background: var(--vidro);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(15px);
+      border-radius: 20px;
+      padding: 40px 35px;
+      box-shadow: 0 0 50px rgba(0, 0, 0, 0.6);
+      text-align: center;
+      animation: fadeIn 0.8s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    h2 {
+      color: var(--dourado);
+      font-size: 2em;
+      margin-bottom: 20px;
+    }
+
+    .logo {
+      width: 160px;
+      height: auto;
+      margin-bottom: 25px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    input {
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background-color: #3a3b3f;
+      color: #fff;
+      font-size: 1em;
+      transition: 0.3s;
+    }
+
+    input:focus {
+      outline: none;
+      background-color: #4a4d52;
+      border: 1px solid var(--dourado);
+    }
+
+    input::placeholder {
+      color: #cfcfcf;
+    }
+
+    button {
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(to right, var(--dourado), var(--laranja));
+      color: var(--cinza-escuro);
+      font-size: 1em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    button:hover {
+      transform: scale(1.03);
+    }
+
+    p {
+      margin-top: 20px;
+      font-size: 0.9em;
+    }
+
+    a {
+      color: var(--dourado);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 30px 25px;
+      }
+
+      h2 {
+        font-size: 1.6em;
+      }
+
+      .logo {
+        width: 130px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Entrar na Taverna</h2>
+    <form id="loginForm">
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="password" id="password" placeholder="Senha" required>
+      <button type="submit" id="login">Login</button>
+      <div id="mensagem_login"></div>
+      <div id="successMessage" style="display:none; color: var(--dourado); margin-top: 10px;"></div>
+    </form>
+    <p>Não tem conta? <a href="registrar.html">Cadastre-se</a></p>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+
+  <script>
+
+    $('#loginForm').on('submit', function (e) {
+        e.preventDefault();
+
+        $('#mensagem_login').text('');
+        $('#successMessage').hide();
+
+        const email = $('#email').val().trim();
+        const password = $('#password').val().trim();
+
+        if (!email || !password) {
+            $('#mensagem_login').text('Preencha todos os campos.').css('color', 'red');
+            return;
+        }
+      
+        $.ajax({
+            url: 'http://127.0.0.1:8000/api/login',
+            method: 'POST',
+            contentType: 'application/json', 
+            dataType: 'json',
+            data: JSON.stringify({ email, password }),
+            success: function (response) {
+                if (response.user && response.user.token) {
+                          console.log(response.user);
+                        document.cookie ="token=" + response.user.token + "; path=/; max-age=3600";
+                        document.cookie ="user_id=" + response.user.id + "; path=/; max-age=3600";
+
+
+                    
+                    //sessionStorage.setItem('jwt', response.user.token);
+
+                    setTimeout(() => {
+                        window.location.href = 'perfil.html';
+                   }, 2000);
+                     console.log("🍪 Cookies do servidor:", document.cookie);
+
+                } else {
+                    $('#mensagem_login').text('Erro inesperado: Token não encontrado na resposta.').css('color', 'red');
+                }
+            },
+            error: function (xhr) {
+                const res = xhr.responseJSON;
+                if (res && res.message) {
+                    $('#mensagem_login')
+                        .text(res.message)
+                        .css('color', 'red');
+                } else {
+                    $('#mensagem_login')
+                        .text('Credenciais inválidas.')
+                        .css('color', 'red');
+                }
+            }
+            
+        });
+
+        function getCookie(nome) {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+              const c = cookies[i].trim();
+              if (c.indexOf(nome + "=") === 0) {
+                  return c.substring((nome + "=").length, c.length);
+              }
+          }
+          return null;
+        }
+    });
+
+</script>
+
+</body>
+</html>
+

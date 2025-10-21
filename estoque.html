@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Estoque | Taverna</title>
+
+  <!-- Bibliotecas externas -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous">
+  </script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
+  <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+
+  <!-- Estilos CSS -->
+  <style>
+    :root {
+      --cinza-escuro: #1a202c;
+      --dourado: #ffb347;
+      --laranja: #ffcc33;
+      --vermelho: #ff6b6b;
+      --cinza-claro: #e2e8f0;
+      --card-bg: rgba(45, 55, 72, 0.8);
+      --card-shadow: rgba(0,0,0,0.3);
+      --bg-tabela: rgba(26, 32, 44, 0.9);
+      --borda-tabela: rgba(255, 179, 71, 0.3);
+      --glass-bg: rgba(255, 255, 255, 0.1);
+      --glass-border: rgba(255, 255, 255, 0.2);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', 'Inter', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+      color: var(--cinza-claro);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(255, 179, 71, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 204, 51, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(255, 107, 107, 0.05) 0%, transparent 50%);
+      z-index: -1;
+    }
+
+    .logo {
+      height: 100px;
+      transform: scale(1.3);
+      transform-origin: left;
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    }
+
+    .logo:hover {
+      filter: drop-shadow(0 0 15px var(--dourado)) brightness(1.1);
+      transform: scale(1.35) translateY(-3px);
+    }
+
+    header {
+      width: 100%;
+      max-width: 1200px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 30px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      animation: slideDown 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    nav a {
+      color: var(--cinza-claro);
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      position: relative;
+      padding: 8px 0;
+    }
+
+    nav a:hover {
+      color: var(--dourado);
+      transform: translateY(-2px);
+    }
+
+    nav a::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: 0;
+      left: 0;
+      background: linear-gradient(to right, var(--dourado), var(--laranja));
+      transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      border-radius: 2px;
+    }
+
+    nav a:hover::after {
+      width: 100%;
+    }
+
+    .main-container {
+      width: 100%;
+      max-width: 1200px;
+      margin-top: 40px;
+      animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .page-title {
+      color: var(--dourado);
+      font-size: 2.5rem;
+      font-weight: 700;
+      text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      position: relative;
+      display: inline-block;
+      background: linear-gradient(135deg, var(--dourado), var(--laranja));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .page-title::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 4px;
+      bottom: -8px;
+      left: 0;
+      background: linear-gradient(to right, var(--dourado), var(--laranja));
+      border-radius: 4px;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .page-title:hover::after {
+      transform: scaleX(1);
+    }
+
+    .add-button {
+      padding: 14px 28px;
+      background: linear-gradient(135deg, var(--dourado), var(--laranja));
+      color: #1a202c;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      text-align: center;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      border: none;
+      box-shadow: 0 6px 20px rgba(255, 179, 71, 0.4);
+      position: relative;
+      overflow: hidden;
+      font-size: 1rem;
+    }
+
+    .add-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.7s;
+    }
+
+    .add-button:hover::before {
+      left: 100%;
+    }
+
+    .add-button:hover {
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 12px 25px rgba(255, 179, 71, 0.5);
+      color: #1a202c;
+    }
+
+    .table-container {
+      background: var(--glass-bg);
+      backdrop-filter: blur(15px);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--glass-border);
+      padding: 25px;
+      transition: all 0.4s ease;
+      position: relative;
+    }
+
+    .table-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(255, 179, 71, 0.1) 0%, transparent 50%);
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      pointer-events: none;
+    }
+
+    .table-container:hover::before {
+      opacity: 1;
+    }
+
+    /* Estilização da tabela */
+    #tabela_produto {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: 100%;
+      border-radius: 15px;
+      overflow: hidden;
+    }
+
+    #tabela_produto thead th {
+      background: linear-gradient(135deg, var(--dourado), var(--laranja));
+      color: #1a202c !important;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+      letter-spacing: 0.5px;
+      padding: 18px 15px;
+      border: none;
+      text-align: center;
+      vertical-align: middle;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    #tabela_produto thead th:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 179, 71, 0.3);
+    }
+
+    #tabela_produto tbody tr {
+      opacity: 0;
+      animation: slideInRow 0.6s ease forwards;
+      transition: all 0.3s ease;
+    }
+
+    @keyframes slideInRow {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    #tabela_produto tbody tr:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    #tabela_produto tbody td {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--cinza-claro);
+      padding: 16px 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: center;
+      vertical-align: middle;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    #tabela_produto tbody tr:hover td {
+      background: rgba(255, 179, 71, 0.1);
+    }
+
+    #tabela_produto tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Botões de ação */
+    .btn-action {
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      position: relative;
+      overflow: hidden;
+      border: none;
+      min-width: 100px;
+    }
+
+    .btn-action::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      transition: width 0.4s, height 0.4s, top 0.4s, left 0.4s;
+    }
+
+    .btn-action:active::before {
+      width: 120px;
+      height: 120px;
+      top: -30px;
+      left: -30px;
+    }
+
+    .btn-alterar {
+      background: linear-gradient(135deg, var(--dourado), var(--laranja));
+      color: #1a202c;
+      box-shadow: 0 4px 12px rgba(255, 179, 71, 0.3);
+    }
+
+    .btn-alterar:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 8px 20px rgba(255, 179, 71, 0.4);
+      color: #1a202c;
+    }
+
+    .btn-excluir {
+      background: linear-gradient(135deg, var(--vermelho), #ff8e8e);
+      color: white;
+      box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+    }
+
+    .btn-excluir:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+      color: white;
+    }
+
+    /* Paginação e elementos do DataTables */
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+      color: var(--cinza-claro) !important;
+      border: 1px solid transparent !important;
+      border-radius: 10px;
+      margin: 0 4px;
+      padding: 8px 14px;
+      background: transparent;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+      background: linear-gradient(135deg, var(--dourado), var(--laranja)) !important;
+      color: #1a202c !important;
+      border: none !important;
+      border-radius: 10px;
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(255, 179, 71, 0.3);
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+      background: rgba(255, 179, 71, 0.2) !important;
+      color: var(--dourado) !important;
+      border: 1px solid var(--dourado) !important;
+      transform: translateY(-2px);
+    }
+
+    .dataTables_wrapper .dataTables_filter input {
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--borda-tabela);
+      border-radius: 10px;
+      color: var(--cinza-claro);
+      padding: 8px 15px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
+    }
+
+    .dataTables_wrapper .dataTables_filter input:focus {
+      outline: none;
+      border-color: var(--dourado);
+      box-shadow: 0 0 0 3px rgba(255, 179, 71, 0.2);
+      transform: scale(1.02);
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .dataTables_wrapper .dataTables_length select {
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--borda-tabela);
+      border-radius: 10px;
+      color: var(--cinza-claro);
+      padding: 6px 12px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
+    }
+
+    .dataTables_wrapper .dataTables_length select:focus {
+      border-color: var(--dourado);
+      box-shadow: 0 0 0 3px rgba(255, 179, 71, 0.2);
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .dataTables_info {
+      color: var(--cinza-claro) !important;
+      font-weight: 500;
+    }
+
+    /* Estilização personalizada para SweetAlert2 - Design Moderno */
+    .swal2-popup {
+      background: rgba(45, 55, 72, 0.95) !important;
+      backdrop-filter: blur(20px) !important;
+      border-radius: 20px !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4) !important;
+      color: var(--cinza-claro) !important;
+      animation: modalAppear 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+      overflow: hidden;
+      position: relative;
+    }
+
+    @keyframes modalAppear {
+      0% {
+        opacity: 0;
+        transform: scale(0.8) translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .swal2-popup::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(to right, var(--dourado), var(--laranja));
+    }
+
+    .swal2-title {
+      color: var(--dourado) !important;
+      font-weight: 700 !important;
+      font-size: 1.8rem !important;
+      text-align: center !important;
+      margin-bottom: 15px !important;
+      background: linear-gradient(135deg, var(--dourado), var(--laranja));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .swal2-html-container {
+      color: var(--cinza-claro) !important;
+      font-size: 1.1rem !important;
+      line-height: 1.6 !important;
+    }
+
+    .swal2-confirm, .swal2-cancel {
+      border-radius: 12px !important;
+      padding: 12px 28px !important;
+      font-weight: 600 !important;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+      position: relative !important;
+      overflow: hidden !important;
+      font-size: 1rem !important;
+      border: none !important;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    .swal2-confirm {
+      background: linear-gradient(135deg, var(--dourado), var(--laranja)) !important;
+      color: #1a202c !important;
+    }
+
+    .swal2-confirm:hover {
+      transform: translateY(-3px) scale(1.05) !important;
+      box-shadow: 0 10px 20px rgba(255, 179, 71, 0.4) !important;
+    }
+
+    .swal2-cancel {
+      background: linear-gradient(135deg, var(--vermelho), #ff8e8e) !important;
+      color: white !important;
+    }
+
+    .swal2-cancel:hover {
+      transform: translateY(-3px) scale(1.05) !important;
+      box-shadow: 0 10px 20px rgba(255, 107, 107, 0.4) !important;
+    }
+
+    .swal2-icon {
+      border-color: var(--dourado) !important;
+      color: var(--dourado) !important;
+      transform: scale(1.1);
+    }
+
+    .swal2-success-line-tip, .swal2-success-line-long {
+      background-color: var(--dourado) !important;
+    }
+
+    .swal2-success-ring {
+      border-color: rgba(255, 179, 71, 0.3) !important;
+    }
+
+    .swal2-error [class^='swal2-x-mark-line'] {
+      background-color: var(--vermelho) !important;
+    }
+
+    .swal2-warning {
+      border-color: var(--laranja) !important;
+      color: var(--laranja) !important;
+    }
+
+    /* Formulário de edição personalizado */
+    .swal2-form {
+      text-align: left;
+      padding: 10px 0;
+    }
+
+    .swal2-form .form-label {
+      color: var(--cinza-claro);
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .swal2-form .form-control {
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      color: var(--cinza-claro);
+      transition: all 0.3s ease;
+      padding: 12px 15px;
+      width: 100%;
+      backdrop-filter: blur(5px);
+    }
+
+    .swal2-form .form-control:focus {
+      background-color: rgba(255, 255, 255, 0.15);
+      border-color: var(--dourado);
+      box-shadow: 0 0 0 3px rgba(255, 179, 71, 0.2);
+      color: var(--cinza-claro);
+      transform: translateY(-2px);
+    }
+
+    /* Loading animation */
+    .swal2-loading {
+      border-color: var(--dourado) !important;
+      border-left-color: transparent !important;
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+      .table-header {
+        flex-direction: column;
+        gap: 20px;
+        align-items: flex-start;
+      }
+      
+      #tabela_produto thead {
+        display: none;
+      }
+      
+      #tabela_produto tbody tr {
+        display: block;
+        margin-bottom: 25px;
+        border-radius: 15px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.05);
+        animation: slideInUp 0.6s ease forwards;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      }
+      
+      @keyframes slideInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      #tabela_produto tbody td {
+        display: block;
+        text-align: right;
+        padding: 12px 20px;
+        position: relative;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      
+      #tabela_produto tbody td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 20px;
+        font-weight: 700;
+        color: var(--dourado);
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+      }
+      
+      .actions-column {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 20px;
+      }
+      
+      .actions-column .btn-action {
+        width: auto;
+        min-width: 120px;
+      }
+
+      .swal2-popup {
+        width: 90% !important;
+        margin: 0 auto !important;
+      }
+    }
+
+    /* Floating animation for visual interest */
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    .floating {
+      animation: float 6s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body>
+  <header class="floating">
+    <img src="taverna logo v3.svg" alt="Logo Taverna" class="logo" />
+    <nav>
+      <a href="welcome.html">Início</a>
+      <a href="catalogo.html">Catalogo</a>
+      <a href="estoque.html">Estoque</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="perfil.html">Perfil</a>
+      <a href="carrinho.html" title="Meu Carrinho">
+        <i class="fas fa-shopping-cart"></i>
+      </a>
+    </nav>
+  </header>
+
+  <div class="main-container">
+    <div class="table-header">
+      <h1 class="page-title">Gerenciamento de Estoque</h1>
+      <a href="cadastroproduto.html" class="add-button">
+        <i class="fas fa-plus-circle"></i> Adicionar Produto
+      </a>
+    </div>
+    
+    <div class="table-container floating" style="animation-delay: 0.2s;">
+      <table id="tabela_produto" class="table table-striped table-hover table-bordered text-center align-middle rounded mx-auto">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Descrição</th>
+            <th>Quantidade</th>
+            <th>Preço Varejo</th>
+            <th>Preço Atacado</th>
+            <th>Custo</th>
+            <th>Lucro</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+<script>
+// Obter o token CSRF do meta tag (se estiver usando Laravel)
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+$(document).ready(function(){
+  // Configuração do DataTables
+  const tabelaProdutos = $('#tabela_produto').DataTable({
+    processing: true,
+    serverSide: false,
+    responsive: true,
+    paging: true,
+    pageLength: 5,
+    lengthChange: false,
+    searching: true,
+    ordering: true,
+    language: {
+      info: "Mostrando _START_ a _END_ de _TOTAL_ produtos",
+      infoEmpty: "Mostrando 0 a 0 de 0 produtos",
+      infoFiltered: "(filtrado de _MAX_ produtos no total)",
+      search: "Pesquisar:",
+      zeroRecords: "Nenhum produto encontrado",
+      paginate: {
+        first: "Primeiro",
+        last: "Último",
+        next: "Próximo",
+        previous: "Anterior"
+      }
+    },
+    ajax: {
+      url: 'http://127.0.0.1:8000/api/retorna_produtos',
+      type: 'GET',
+      dataSrc: 'data'
+    },
+    columns: [
+      { data: 'nome', title: 'Nome' },
+      { data: 'descricao', title: 'Descrição' },
+      { data: 'quantidade', title: 'Quantidade' },
+      { 
+        data: 'preco_varejo', 
+        title: 'Preço Varejo',
+        render: function(data) {
+          return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+          }).format(data);
+        }
+      },
+      { 
+        data: 'preco_atacado', 
+        title: 'Preço Atacado',
+        render: function(data) {
+          return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+          }).format(data);
+        }
+      },
+      { 
+        data: 'custo', 
+        title: 'Custo',
+        render: function(data) {
+          return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+          }).format(data);
+        }
+      },
+      { 
+        data: 'lucro', 
+        title: 'Lucro',
+        render: function(data) {
+          return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+          }).format(data);
+        }
+      },
+      {
+        data: 'id',
+        title: 'Ações',
+        render: function (data, type, row) {
+          // Armazenar os dados em um atributo data-* sem escapar HTML
+          // Vamos usar base64 para codificar o JSON
+          const rowData = btoa(unescape(encodeURIComponent(JSON.stringify(row))));
+          
+          return ` 
+          <div class="row d-flex justify-content-center">
+            <div class="col-12 col-md-6 mb-2 mb-md-0">
+              <button class="btn-action btn-alterar alterar" data-id="${data}" data-row-b64="${rowData}">
+                <i class="fas fa-edit"></i> Alterar
+              </button>
+            </div>
+            <div class="col-12 col-md-6">
+              <button class="btn-action btn-excluir deletar" data-id="${data}">
+                <i class="fas fa-trash"></i> Excluir
+              </button>
+            </div>
+          </div>`;
+        }
+      }
+    ],
+    initComplete: function() {
+      if (window.innerWidth <= 768) {
+        this.api().columns().every(function() {
+          const column = this;
+          const title = $(column.header()).text();
+          $(column.nodes()).each(function() {
+            $(this).attr('data-label', title);
+          });
+        });
+      }
+    },
+    drawCallback: function() {
+      if (window.innerWidth <= 768) {
+        this.api().columns().every(function() {
+          const column = this;
+          const title = $(column.header()).text();
+          $(column.nodes()).each(function() {
+            $(this).attr('data-label', title);
+          });
+        });
+      }
+    }
+  });
+
+  // Ajustar na redimensionamento da janela
+  $(window).resize(function() {
+    if (window.innerWidth <= 768) {
+      tabelaProdutos.columns().every(function() {
+        const column = this;
+        const title = $(column.header()).text();
+        $(column.nodes()).each(function() {
+          $(this).attr('data-label', title);
+        });
+      });
+    }
+  });
+
+  // --- LÓGICA PARA EXCLUIR PRODUTO ---
+  $(document).on('click', '.deletar', function() {
+    const productId = $(this).data('id');
+    
+    // Efeito de clique no botão
+    $(this).addClass('active');
+    setTimeout(() => {
+      $(this).removeClass('active');
+    }, 300);
+    
+    Swal.fire({
+      title: 'Tem certeza?',
+      text: 'Esta ação não pode ser desfeita!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sim, excluir!',
+      cancelButtonText: 'Cancelar',
+      reverseButtons: true,
+      customClass: {
+        confirmButton: 'btn-excluir',
+        cancelButton: 'btn-alterar',
+        popup: 'animated-alert'
+      },
+      buttonsStyling: false,
+      showClass: {
+        popup: 'animate__animated animate__fadeInDown'
+      },
+      hideClass: {
+        popup: 'animate__animated animate__fadeOutUp'
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Enviar requisição DELETE para a API
+        $.ajax({
+          url: `http://127.0.0.1:8000/api/produtos/${productId}`,
+          type: 'DELETE',
+          headers: {
+            'X-CSRF-TOKEN': csrfToken
+          },
+          success: function(response) {
+            Swal.fire({
+              title: 'Excluído!',
+              text: 'Produto excluído com sucesso.',
+              icon: 'success',
+              customClass: {
+                confirmButton: 'btn-alterar',
+                popup: 'animated-alert'
+              },
+              buttonsStyling: false,
+              showClass: {
+                popup: 'animate__animated animate__zoomIn'
+              },
+              hideClass: {
+                popup: 'animate__animated animate__zoomOut'
+              }
+            });
+            // Recarregar a tabela para atualizar a lista
+            tabelaProdutos.ajax.reload(null, false);
+          },
+          error: function(xhr, status, error) {
+            Swal.fire({
+              title: 'Erro!',
+              text: 'Não foi possível excluir o produto.',
+              icon: 'error',
+              customClass: {
+                confirmButton: 'btn-alterar',
+                popup: 'animated-alert'
+              },
+              buttonsStyling: false,
+              showClass: {
+                popup: 'animate__animated animate__shakeX'
+              }
+            });
+            console.error('Erro ao excluir:', error);
+          }
+        });
+      }
+    });
+  });
+
+  // --- LÓGICA PARA EDITAR PRODUTO ---
+  $(document).on('click', '.alterar', function() {
+    // Efeito de clique no botão
+    $(this).addClass('active');
+    setTimeout(() => {
+      $(this).removeClass('active');
+    }, 300);
+    
+    // Decodificar os dados da linha de base64
+    const rowDataBase64 = $(this).data('row-b64');
+    let rowData;
+    
+    try {
+      const jsonString = decodeURIComponent(escape(atob(rowDataBase64)));
+      rowData = JSON.parse(jsonString);
+    } catch (error) {
+      console.error('Erro ao decodificar dados da linha:', error);
+      Swal.fire({
+        title: 'Erro!',
+        text: 'Não foi possível carregar os dados do produto.',
+        icon: 'error',
+        customClass: {
+          confirmButton: 'btn-alterar',
+          popup: 'animated-alert'
+        },
+        buttonsStyling: false,
+        showClass: {
+          popup: 'animate__animated animate__shakeX'
+        }
+      });
+      return;
+    }
+    
+    // Função para formatar valores monetários para exibição
+    const formatCurrency = (value) => {
+      return parseFloat(value).toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    };
+
+    Swal.fire({
+      title: 'Editar Produto',
+      html: `
+        <form id="form-editar" class="swal2-form">
+          <input type="hidden" id="edit-id" value="${rowData.id}">
+          <div class="form-group mb-3">
+            <label for="edit-nome" class="form-label">Nome</label>
+            <input type="text" id="edit-nome" class="form-control" value="${rowData.nome.replace(/"/g, '&quot;')}" required>
+          </div>
+          <div class="form-group mb-3">
+            <label for="edit-descricao" class="form-label">Descrição</label>
+            <textarea id="edit-descricao" class="form-control" rows="3" required>${rowData.descricao.replace(/"/g, '&quot;')}</textarea>
+          </div>
+          <div class="form-group mb-3">
+            <label for="edit-quantidade" class="form-label">Quantidade</label>
+            <input type="number" id="edit-quantidade" class="form-control" value="${rowData.quantidade}" required>
+          </div>
+          <div class="form-group mb-3">
+            <label for="edit-preco-varejo" class="form-label">Preço Varejo</label>
+            <input type="text" id="edit-preco-varejo" class="form-control" value="${formatCurrency(rowData.preco_varejo)}" required>
+          </div>
+          <div class="form-group mb-3">
+            <label for="edit-preco-atacado" class="form-label">Preço Atacado</label>
+            <input type="text" id="edit-preco-atacado" class="form-control" value="${formatCurrency(rowData.preco_atacado)}" required>
+          </div>
+          <div class="form-group mb-3">
+            <label for="edit-custo" class="form-label">Custo</label>
+            <input type="text" id="edit-custo" class="form-control" value="${formatCurrency(rowData.custo)}" required>
+          </div>
+        </form>
+      `,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: 'Salvar Alterações',
+      cancelButtonText: 'Cancelar',
+      showLoaderOnConfirm: true,
+      reverseButtons: true,
+      customClass: {
+        confirmButton: 'btn-alterar',
+        cancelButton: 'btn-excluir',
+        popup: 'animated-alert'
+      },
+      buttonsStyling: false,
+      showClass: {
+        popup: 'animate__animated animate__fadeInDown'
+      },
+      hideClass: {
+        popup: 'animate__animated animate__fadeOutUp'
+      },
+      preConfirm: () => {
+        const id = $('#edit-id').val();
+        const nome = $('#edit-nome').val();
+        const descricao = $('#edit-descricao').val();
+        const quantidade = $('#edit-quantidade').val();
+        
+        // Lógica de limpeza dos valores de moeda
+        const cleanCurrency = (value) => {
+          return parseFloat(value.replace('R$', '')
+            .replace(/\./g, '')
+            .replace(',', '.')
+            .trim());
+        };
+        
+        const preco_varejo = cleanCurrency($('#edit-preco-varejo').val());
+        const preco_atacado = cleanCurrency($('#edit-preco-atacado').val());
+        const custo = cleanCurrency($('#edit-custo').val());
+
+        if (!nome || !descricao || !quantidade || isNaN(preco_varejo) || isNaN(preco_atacado) || isNaN(custo)) {
+          Swal.showValidationMessage('Por favor, preencha todos os campos corretamente.');
+          return false;
+        }
+
+        // Enviar requisição PUT para a API
+        return $.ajax({
+          url: `http://127.0.0.1:8000/api/produtos/${id}`,
+          type: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken
+          },
+          data: JSON.stringify({
+            nome: nome,
+            descricao: descricao,
+            quantidade: quantidade,
+            preco_varejo: preco_varejo,
+            preco_atacado: preco_atacado,
+            custo: custo,
+            lucro: (preco_varejo - custo).toFixed(2)
+          })
+        }).then(response => {
+          return response;
+        }).catch(error => {
+          Swal.showValidationMessage('Erro ao salvar as alterações. Verifique o console para mais detalhes.');
+          console.error('Erro na edição:', error);
+          return Promise.reject(error);
+        });
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire({
+          title: 'Sucesso!',
+          text: 'Produto atualizado com sucesso.',
+          icon: 'success',
+          customClass: {
+            confirmButton: 'btn-alterar',
+            popup: 'animated-alert'
+          },
+          buttonsStyling: false,
+          showClass: {
+            popup: 'animate__animated animate__zoomIn'
+          },
+          hideClass: {
+            popup: 'animate__animated animate__zoomOut'
+          }
+        });
+        tabelaProdutos.ajax.reload(null, false);
+      }
+    });
+    
+    // Adicionar máscaras monetárias aos campos de preço
+    setTimeout(() => {
+      $('#edit-preco-varejo, #edit-preco-atacado, #edit-custo').mask('000.000.000.000.000,00', {reverse: true});
+    }, 100);
+  });
+});
+
+function getCookie(nome) {
+            const cookies = document.cookie.split(";");
+            for (let i = 0; i < cookies.length; i++) {
+                const c = cookies[i].trim();
+                if (c.indexOf(nome + "=") === 0) {
+                    return c.substring((nome + "=").length, c.length);
+                }
+            }
+            return null;
+        }
+
+        // Função para exibir todos os cookies na página
+        function displayCookies() {
+            const cookieContainer = document.getElementById("cookieContainer");
+            const cookies = document.cookie.split(";");
+            
+            if (cookies.length === 0 || (cookies.length === 1 && cookies[0] === "")) {
+                cookieContainer.innerHTML = "<div class='cookie-item'>Nenhum cookie encontrado.</div>";
+                return;
+            }
+            
+            cookieContainer.innerHTML = "";
+            cookies.forEach(cookie => {
+                const cookieItem = document.createElement("div");
+                cookieItem.className = 'cookie-item';
+                cookieItem.textContent = cookie.trim();
+                cookieContainer.appendChild(cookieItem);
+            });
+        }
+
+        // Função principal para verificar autenticação
+        function checkAuth() {
+            console.clear();
+            console.log("=== VERIFICAÇÃO DE TOKEN E COOKIES ===");
+            
+            // Recupera cookies
+            const userId = getCookie("user_id");
+            const token = getCookie("token");
+            
+            // Exibe no console
+            console.log("🔍 Cookies recuperados:");
+            console.log("user_id:", userId);
+            console.log("token:", token);
+            
+            // Exibe todos os cookies disponíveis
+            console.log("🍪 Todos os cookies:", document.cookie);
+            
+            if (token) {
+                console.log("✅ Token encontrado! Usuário potencialmente autenticado.");
+            } else {
+                console.log("❌ Nenhum token encontrado. Usuário não autenticado.");
+            }
+            
+            // Atualiza a exibição de cookies na página
+            displayCookies();
+        }
+
+        // Executa automaticamente quando a página carrega
+        window.onload = function() {
+            console.log("Página carregada. Use o botão para verificar token e cookies.");
+            displayCookies();
+        };
+</script>
+</body>
+</html>

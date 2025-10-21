@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Produtos - Taverna</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cinza-escuro: #1a2029;
+            --dourado: #d4af37;
+            --laranja: #c86b3d;
+            --cinza-claro: #e0e0e0;
+            --marrom-escuro: #2a211c;
+            --nav-bg-default: rgba(26, 32, 41, 0.9);
+            --nav-bg-scrolled: #15191f;
+            --nav-link-default: var(--cinza-claro);
+            --nav-link-scrolled: var(--dourado);
+            --card-bg: rgba(42, 33, 28, 0.85);
+            --card-shadow: rgba(0, 0, 0, 0.6);
+            --produto-card-bg: #3a445e;
+            --transition-slow: 0.5s ease;
+            --transition-fast: 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Raleway', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(to right, var(--cinza-escuro), #14181f);
+            color: var(--cinza-claro);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        h1, h2, h3, h4 {
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        .particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(212, 175, 55, 0.15);
+            border-radius: 50%;
+            opacity: 0;
+            animation: floatParticle 15s infinite linear;
+        }
+
+        @keyframes floatParticle {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.4;
+            }
+            90% {
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(-100px) scale(1.2);
+                opacity: 0;
+            }
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 30%, rgba(20, 24, 31, 0.95) 90%);
+            z-index: -1;
+        }
+        
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 5%;
+            background-color: var(--nav-bg-default);
+            transition: all var(--transition-fast);
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+        }
+
+        header.scrolled {
+            background-color: var(--nav-bg-scrolled);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            padding: 15px 5%;
+        }
+
+        .logo {
+            height: 70px;
+            transition: all var(--transition-fast);
+            filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.5));
+        }
+
+        header.scrolled .logo {
+            height: 60px;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+        }
+
+        nav a {
+            color: var(--nav-link-default);
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+            position: relative;
+            font-size: 1.1rem;
+        }
+
+        header.scrolled nav a {
+            color: var(--nav-link-scrolled);
+        }
+
+        nav a:not(:last-child):after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--dourado);
+            transition: width var(--transition-fast);
+        }
+
+        nav a:hover:after {
+            width: 100%;
+        }
+
+        nav a:hover {
+            color: var(--dourado);
+        }
+        
+        .cart-icon {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--laranja);
+            color: white;
+            font-size: 0.7rem;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .main-content {
+            width: 100%;
+            max-width: 1400px;
+            padding: 40px 5%;
+            margin-top: 140px;
+        }
+
+        .page-title {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 3.5rem;
+            color: var(--dourado);
+            background: linear-gradient(90deg, var(--dourado), var(--laranja));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            animation: fadeDown 1s ease-in-out;
+        }
+        
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .product-card {
+            background: linear-gradient(145deg, rgba(42, 33, 28, 0.85), #352a24);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px var(--card-shadow);
+            transition: transform 0.3s;
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px var(--card-shadow);
+        }
+
+        .product-info {
+            padding: 20px;
+        }
+
+        .product-name {
+            font-size: 1.3em;
+            color: var(--dourado);
+            margin-bottom: 10px;
+            font-family: 'Cinzel', serif;
+        }
+
+        .product-description {
+            color: var(--cinza-claro);
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .product-price {
+            font-weight: bold;
+            color: var(--dourado);
+            font-size: 1.2em;
+        }
+
+        .product-stock {
+            color: var(--cinza-claro);
+            font-size: 0.9em;
+        }
+        
+        .product-actions {
+            display: flex;
+            justify-content: center;
+            padding: 0 20px 20px;
+        }
+
+        .btn-ver-mais {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--dourado);
+            color: var(--cinza-escuro);
+            text-decoration: none;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+        
+        .btn-ver-mais:hover {
+            background-color: var(--laranja);
+            color: #fff;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .pagination-btn {
+            padding: 8px 15px;
+            background-color: var(--card-bg);
+            color: var(--cinza-claro);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .pagination-btn.active {
+            background: var(--dourado);
+            color: var(--cinza-escuro);
+            border-color: var(--dourado);
+        }
+        
+        .pagination-btn:hover {
+            background-color: var(--laranja);
+            border-color: var(--laranja);
+            color: white;
+        }
+
+        .no-products, .loading {
+            text-align: center;
+            padding: 40px;
+            grid-column: 1 / -1;
+            font-size: 1.2rem;
+        }
+        
+        .no-products {
+            color: var(--cinza-claro);
+        }
+        
+        .loading {
+            color: var(--dourado);
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(212, 175, 55, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--dourado);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .footer {
+            background-color: #15181f;
+            color: #d9d9d9;
+            padding: 80px 5% 30px;
+            width: 100%;
+            margin-top: 60px;
+            border-top: 1px solid rgba(212, 175, 55, 0.1);
+        }
+
+        .footer-container {
+            display: flex;
+            flex-wrap: wrap;
+            max-width: 1300px;
+            margin: auto;
+            justify-content: space-between;
+            gap: 50px;
+        }
+
+        .footer-col {
+            flex: 1 1 250px;
+        }
+
+        .footer h3 {
+            color: var(--dourado);
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer h3:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background: var(--laranja);
+        }
+
+        .footer p, .footer li {
+            font-size: 1rem;
+            line-height: 1.8;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .footer ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer a {
+            color: #d9d9d9;
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        .footer a:hover {
+            color: var(--laranja);
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-icons a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all var(--transition-fast);
+        }
+
+        .social-icons a:hover {
+            background: var(--dourado);
+            transform: translateY(-3px);
+        }
+
+        .social-icons img {
+            width: 20px;
+            height: 20px;
+            filter: brightness(0) invert(1);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 60px;
+            padding-top: 40px;
+            font-size: 0.9rem;
+            color: #999;
+        }
+
+        .footer-bottom h1 {
+            font-size: 1rem;
+            margin-bottom: 15px;
+            color: var(--cinza-claro);
+            font-weight: 400;
+        }
+
+        @media (max-width: 1200px) {
+            .page-title h1 {
+                font-size: 3rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+            nav a {
+                margin: 0 10px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 15px 20px;
+            }
+            
+            .logo {
+                height: 60px;
+            }
+            
+            .page-title {
+                margin-top: 120px;
+                padding: 15px;
+                font-size: 2.5rem;
+            }
+            
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .modal-content {
+                width: 95%;
+            }
+            
+            .footer-container {
+                gap: 30px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            header {
+                flex-direction: column;
+                padding: 15px;
+            }
+            
+            header.scrolled {
+                padding: 10px 15px;
+            }
+            
+            nav {
+                margin-top: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            nav a {
+                margin: 5px 10px;
+                font-size: 0.9rem;
+            }
+            
+            .page-title {
+                font-size: 2.2rem;
+            }
+            
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles-container" id="particles-container"></div>
+    <div class="overlay"></div>
+
+    <header>
+        <img src="taverna logo v3.svg" alt="Logo Taverna" class="logo" />
+        <nav>
+            <a href="welcome.html">Início</a>
+            <a href="catalogo.html">Catálogo</a>
+            <a href="estoque.html">Estoque</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="perfil.html">Perfil</a>
+            <a href="carrinho.html" title="Meu Carrinho" class="cart-icon">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count">0</span>
+            </a>
+        </nav>
+    </header>
+
+    <div class="main-content">
+        <h1 class="page-title" id="categoria-titulo"></h1>
+        
+        <div class="products-grid" id="products-container">
+            <div class="loading">
+                <div class="spinner"></div>
+            </div>
+        </div>
+        
+        <div class="pagination" id="pagination">
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-col">
+                <h3>Sobre a Taverna</h3>
+                <p>
+                    A Taverna é uma plataforma moderna para gerenciamento de adegas, unindo tradição e tecnologia. Organize, catalogue e controle sua coleção de bebidas com elegância e praticidade.
+                </p>
+            </div>
+
+            <div class="footer-col">
+                <h3>Links Rápidos</h3>
+                <ul>
+                    <li><a href="welcome.html">Início</a></li>
+                    <li><a href="catalogo.html">Catálogo</a></li>
+                    <li><a href="estoque.html">Estoque</a></li>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3>Siga-nos</h3>
+                <div class="social-icons">
+                    <a href="#"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/instagram.svg" alt="Instagram"></a>
+                    <a href="#"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/facebook.svg" alt="Facebook"></a>
+                    <a href="#"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/twitter.svg" alt="Twitter"></a>
+                    <a href="#"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/github.svg" alt="GitHub"></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <h1>BEBA COM MODERAÇÃO. O CONTEÚDO DESSA PÁGINA É DESTINADO PARA MAIORES DE 18 ANOS</h1>
+            <p>&copy; 2025 Taverna. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Variáveis globais
+        let produtos = [];
+        let paginaAtual = 1;
+        const produtosPorPagina = 9;
+        let categoriaId = null;
+
+        // Elementos DOM
+        const productsContainer = document.getElementById('products-container');
+        const paginationElement = document.getElementById('pagination');
+        const categoriaTitulo = document.getElementById('categoria-titulo');
+
+        // Função para obter o ID do catálogo da URL
+        function getCategoriaIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('id');
+        }
+
+        // Função para buscar o nome da categoria com base no ID
+        async function fetchCategoriaNome(id) {
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/api/catalogos/${id}`);
+                if (!response.ok) throw new Error('Categoria não encontrada');
+                const categoria = await response.json();
+                return categoria.nome;
+            } catch (error) {
+                console.error('Erro ao buscar nome da categoria:', error);
+                return 'Produtos';
+            }
+        }
+
+        // Função para carregar produtos da API
+        async function carregarProdutos() {
+            categoriaId = getCategoriaIdFromUrl();
+            if (!categoriaId) {
+                productsContainer.innerHTML = '<div class="no-products">ID da categoria não encontrado na URL.</div>';
+                return;
+            }
+
+            try {
+                productsContainer.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+                
+                const categoriaNome = await fetchCategoriaNome(categoriaId);
+                categoriaTitulo.textContent = categoriaNome;
+
+                const token = localStorage.getItem('auth_token');
+                const headers = {};
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                    headers['Accept'] = 'application/json';
+                }
+                
+                const response = await fetch(`http://127.0.0.1:8000/api/catalogos/${categoriaId}/produtos`, {
+                    headers: headers
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Erro ao carregar produtos');
+                }
+                
+                produtos = await response.json();
+                
+                renderizarProdutos();
+                renderizarPaginacao();
+            } catch (error) {
+                console.error('Erro:', error);
+                productsContainer.innerHTML = `
+                    <div class="no-products">
+                        Erro ao carregar produtos. Verifique sua conexão ou tente novamente mais tarde.
+                    </div>
+                `;
+            }
+        }
+
+        // Função para renderizar produtos na grade
+        function renderizarProdutos() {
+            if (produtos.length === 0) {
+                productsContainer.innerHTML = '<div class="no-products">Nenhum produto encontrado nesta categoria.</div>';
+                paginationElement.innerHTML = '';
+                return;
+            }
+            
+            const indexInicio = (paginaAtual - 1) * produtosPorPagina;
+            const indexFim = indexInicio + produtosPorPagina;
+            const produtosPagina = produtos.slice(indexInicio, indexFim);
+            
+            productsContainer.innerHTML = produtosPagina.map(produto => `
+                <div class="product-card">
+                    <div class="product-info">
+                        <h3 class="product-name">${produto.nome}</h3>
+                        <p class="product-description">${produto.descricao || 'Sem descrição'}</p>
+                        <div class="product-details">
+                            <span class="product-price">R$ ${parseFloat(produto.preco_varejo).toFixed(2)}</span>
+                            <span class="product-stock">Estoque: ${produto.quantidade}</span>
+                        </div>
+                    </div>
+                    <div class="product-actions">
+                        <a href="produtoaberto.html?id=${produto.id}" class="btn-ver-mais">Ver mais</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Função para renderizar controles de paginação
+        function renderizarPaginacao() {
+            const totalPaginas = Math.ceil(produtos.length / produtosPorPagina);
+            
+            if (totalPaginas <= 1) {
+                paginationElement.innerHTML = '';
+                return;
+            }
+            
+            let paginacaoHTML = '';
+            
+            if (paginaAtual > 1) {
+                paginacaoHTML += `<button class="pagination-btn" data-page="${paginaAtual - 1}">Anterior</button>`;
+            }
+            
+            for (let i = 1; i <= totalPaginas; i++) {
+                if (i === paginaAtual) {
+                    paginacaoHTML += `<button class="pagination-btn active" data-page="${i}">${i}</button>`;
+                } else {
+                    paginacaoHTML += `<button class="pagination-btn" data-page="${i}">${i}</button>`;
+                }
+            }
+            
+            if (paginaAtual < totalPaginas) {
+                paginacaoHTML += `<button class="pagination-btn" data-page="${paginaAtual + 1}">Próxima</button>`;
+            }
+            
+            paginationElement.innerHTML = paginacaoHTML;
+            
+            document.querySelectorAll('.pagination-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    paginaAtual = parseInt(e.target.getAttribute('data-page'));
+                    renderizarProdutos();
+                    renderizarPaginacao();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            });
+        }
+
+        // Efeito de partículas animadas
+        function createParticles() {
+            const container = document.getElementById('particles-container');
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                const size = Math.random() * 20 + 5;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                const posX = Math.random() * 100;
+                particle.style.left = `${posX}%`;
+                const delay = Math.random() * 15;
+                particle.style.animationDelay = `${delay}s`;
+                container.appendChild(particle);
+            }
+        }
+        
+        // Scroll header
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+            carregarProdutos();
+        });
+
+        function getCookie(nome) {
+            const cookies = document.cookie.split(";");
+            for (let i = 0; i < cookies.length; i++) {
+                const c = cookies[i].trim();
+                if (c.indexOf(nome + "=") === 0) {
+                    return c.substring((nome + "=").length, c.length);
+                }
+            }
+            return null;
+        }
+
+        // Função para exibir todos os cookies na página
+        function displayCookies() {
+            const cookieContainer = document.getElementById("cookieContainer");
+            const cookies = document.cookie.split(";");
+            
+            if (cookies.length === 0 || (cookies.length === 1 && cookies[0] === "")) {
+                cookieContainer.innerHTML = "<div class='cookie-item'>Nenhum cookie encontrado.</div>";
+                return;
+            }
+            
+            cookieContainer.innerHTML = "";
+            cookies.forEach(cookie => {
+                const cookieItem = document.createElement("div");
+                cookieItem.className = "cookie-item";
+                cookieItem.textContent = cookie.trim();
+                cookieContainer.appendChild(cookieItem);
+            });
+        }
+
+        // Função principal para verificar autenticação
+        function checkAuth() {
+            console.clear();
+            console.log("=== VERIFICAÇÃO DE TOKEN E COOKIES ===");
+            
+            // Recupera cookies
+            const userId = getCookie("user_id");
+            const token = getCookie("token");
+            
+            // Exibe no console
+            console.log("🔍 Cookies recuperados:");
+            console.log("user_id:", userId);
+            console.log("token:", token);
+            
+            // Exibe todos os cookies disponíveis
+            console.log("🍪 Todos os cookies:", document.cookie);
+            
+            if (token) {
+                console.log("✅ Token encontrado! Usuário potencialmente autenticado.");
+            } else {
+                console.log("❌ Nenhum token encontrado. Usuário não autenticado.");
+            }
+            
+            // Atualiza a exibição de cookies na página
+            displayCookies();
+        }
+
+        // Executa automaticamente quando a página carrega
+        window.onload = function() {
+            console.log("Página carregada. Use o botão para verificar token e cookies.");
+            displayCookies();
+        };
+    </script>
+</body>
+</html>

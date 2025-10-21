@@ -1,0 +1,214 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="pt-BR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>A Runa da Taverna - TAVERNA</title>
+    <style type="text/css">
+        /* Reset de CSS */
+        body, table, td, p, a, li, blockquote {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        table { border-collapse: collapse; }
+        img { 
+            border: 0; 
+            outline: none; 
+            text-decoration: none; 
+            -ms-interpolation-mode: bicubic;
+            display: block;
+        }
+        
+        /* Cores do Tema (Magia e Pedra) */
+        .cor-pedra-escura { color: #151515; }
+        .cor-runa-dourada { color: #d4af37; }
+        .cor-luz-magica { color: #00ffff; }
+        .cor-texto-principal { color: #fdf5e6; }
+        
+        /* Efeitos de brilho e sombra */
+        .brilho-runa {
+            text-shadow: 0 0 5px #d4af37, 0 0 10px #d4af37, 0 0 15px rgba(212, 175, 55, 0.5);
+        }
+        .sombra-profunda {
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+        }
+        
+        /* Estilos principais */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0a0a0a;
+            background-image: url('https://i.imgur.com/jl97g0C.jpg');
+            background-repeat: repeat;
+            font-family: 'Georgia', serif;
+            color: #e0d6c9;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #151515;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(to bottom, #1a1a1a 0%, #0f0f0f 100%);
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 1px solid #d4af37;
+        }
+        
+        .header h1 {
+            color: #d4af37;
+            font-size: 32px;
+            font-weight: bold;
+            margin: 0 0 5px 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .header p {
+            color: #b3a68a;
+            font-size: 16px;
+            margin: 0;
+            font-style: italic;
+        }
+        
+        .content {
+            padding: 30px;
+            line-height: 1.6;
+            font-size: 16px;
+            color: #e0d6c9;
+        }
+        
+        .code-box {
+            background-color: #0d0d0d;
+            border: 2px solid #333;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 30px 0;
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 8px;
+            color: #d4af37;
+            text-shadow: 0 0 5px rgba(212, 175, 55, 0.4);
+        }
+        
+        .button {
+            display: block;
+            width: 80%;
+            max-width: 280px;
+            background: linear-gradient(to bottom, #d4af37 0%, #b8860b 100%);
+            color: #151515 !important;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+            padding: 15px 0;
+            text-align: center;
+            border-radius: 5px;
+            margin: 30px auto;
+            border: 1px solid #f1c40f;
+        }
+        
+        .button:hover {
+            background: linear-gradient(to bottom, #f1c40f 0%, #d4af37 100%);
+        }
+        
+        .footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #8c8c8c;
+            border-top: 1px solid #2a2a2a;
+        }
+        
+        .footer a {
+            color: #d4af37;
+            text-decoration: underline;
+        }
+        
+        /* Elementos decorativos */
+        .rune-decoration {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 24px;
+            color: #d4af37;
+        }
+        
+        /* Responsividade */
+        @media only screen and (max-width: 600px) {
+            .container {
+                width: 100% !important;
+                border-radius: 0;
+            }
+            
+            .content {
+                padding: 20px !important;
+            }
+            
+            .code-box {
+                font-size: 24px !important;
+                letter-spacing: 4px !important;
+                padding: 15px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <center>
+        <table class="container" align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+            <!-- Cabeçalho -->
+            <tr>
+                <td class="header">
+                    <h1>A Taverna</h1>
+                    <p>A Laje Desperta</p>
+                </td>
+            </tr>
+            
+            <!-- Conteúdo -->
+            <tr>
+                <td class="content">
+                    <p>Olá, <strong style="color: #d4af37;">{{$user->name}}</strong>. A escuridão sussurra seu nome.</p>
+                    <p>Para cruzar o limiar e adentrar nossos salões, você deve invocar a runa com sua essência.</p>
+                    
+                    <div class="rune-decoration">✧ ✦ ✧</div>
+                    
+                    <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                        <tr>
+                            <td align="center">
+                                <div class="code-box">
+                                    {{$user->codigo}}
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    <p>Use sua própria magia para decifrar o código acima, ou clique no talismã abaixo para um ritual mais rápido.</p>
+                    
+                    <a href="https://seusite.com/verificacao?codigo={{$user->codigo}}" class="button" target="_blank">ATIVAR RUNA</a>
+                    
+                    <div class="rune-decoration">✧ ✦ ✧</div>
+                    
+                    <p style="text-align: center; font-style: italic; margin-top: 20px;">
+                        "Que as runas guiem seu caminho e que a taverna lhe ofereça refúgio."
+                    </p>
+                </td>
+            </tr>
+            
+            <!-- Rodapé -->
+            <tr>
+                <td class="footer">
+                    <p>A runa se desfez? <a href="https://seusite.com/reenviar" target="_blank">Invoque-a novamente</a></p>
+                    <p>© 2023 A Taverna. Todos os segredos guardados.</p>
+                </td>
+            </tr>
+        </table>
+    </center>
+</body>
+</html>

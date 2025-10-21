@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil | Taverna</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #1a2029;
+            --wood-1: #2d3748;
+            --wood-2: #4a5568;
+            --accent: #f2a900;
+            --accent-2: #d98f00;
+            --paper: #f6efd9;
+            --muted: #b8a58a;
+            --shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Cinzel', serif;
+            background: var(--bg-dark);
+            color: var(--paper);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .taverna-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .taverna-header {
+            background: linear-gradient(135deg, var(--wood-1), var(--wood-2));
+            border: 3px solid var(--accent);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .taverna-logo {
+            width: 80px;
+            height: 80px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--bg-dark);
+            border: 4px solid var(--paper);
+        }
+
+        .title-section h1 {
+            font-size: 2.5rem;
+            color: var(--accent);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 5px;
+        }
+
+        .title-section p {
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        /* Main Content */
+        .profile-content {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+        }
+
+        /* Profile Card */
+        .profile-card {
+            background: linear-gradient(135deg, var(--wood-1), var(--wood-2));
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--accent);
+            text-align: center;
+        }
+
+        .avatar-container {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            border: 4px solid var(--accent);
+            padding: 5px;
+            background: var(--wood-2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            background: var(--wood-1);
+        }
+
+        .avatar-placeholder {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: var(--wood-1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: var(--accent);
+        }
+
+        .profile-name {
+            font-size: 1.5rem;
+            color: var(--accent);
+            margin-bottom: 5px;
+        }
+
+        .profile-role {
+            color: var(--muted);
+            margin-bottom: 20px;
+        }
+
+        /* Avatar Selection */
+        .avatar-selection {
+            margin: 20px 0;
+        }
+
+        .avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .avatar-option {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            object-fit: cover;
+        }
+
+        .avatar-option:hover {
+            transform: scale(1.1);
+            border-color: var(--accent);
+        }
+
+        .avatar-option.selected {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent);
+        }
+
+        /* Info Card */
+        .info-card {
+            background: linear-gradient(135deg, var(--wood-1), var(--wood-2));
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--accent);
+        }
+
+        .card-title {
+            color: var(--accent);
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            color: var(--accent);
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            background: var(--wood-2);
+            border: 2px solid var(--accent);
+            border-radius: 8px;
+            color: var(--paper);
+            font-size: 1rem;
+            font-family: 'Cinzel', serif;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-2);
+            box-shadow: 0 0 10px rgba(242, 169, 0, 0.3);
+        }
+
+        .form-input:readonly {
+            background: #718096;
+            border-color: #718096;
+            color: #a0aec0;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Cinzel', serif;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: var(--bg-dark);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(242, 169, 0, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent);
+            color: var(--bg-dark);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 38, 38, 0.4);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: var(--bg-dark);
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Loading */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--muted);
+            border-radius: 50%;
+            border-top-color: var(--accent);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .profile-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .avatar-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="taverna-container">
+        <!-- Header -->
+        <header class="taverna-header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="taverna-logo">T</div>
+                    <div class="title-section">
+                        <h1>Taverna do Aventureiro</h1>
+                        <p>Onde histórias e bons drinks se encontram</p>
+                    </div>
+                </div>
+                <button class="btn btn-danger" id="logoutBtn">Sair da Taverna</button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="profile-content">
+            <!-- Profile Card -->
+            <div class="profile-card">
+                <div class="avatar-container">
+                    <div class="avatar-placeholder" id="avatarPlaceholder">🧙</div>
+                    <img src="" alt="Avatar" class="avatar" id="avatarImage" style="display: none;">
+                </div>
+                
+                <h2 class="profile-name" id="userName">Carregando...</h2>
+                <p class="profile-role" id="userRole">Aventureiro</p>
+                
+                <!-- Seleção de Avatares -->
+                <div class="avatar-selection">
+                    <h3 style="color: var(--accent); margin-bottom: 15px;">Escolha seu Avatar</h3>
+                    <div class="avatar-grid" id="avatarGrid">
+                        <!-- Avatares serão carregados via JavaScript -->
+                    </div>
+                </div>
+
+                <div class="button-group" style="flex-direction: column;">
+                    <button class="btn btn-primary" onclick="updateProfile()">
+                        <span id="saveText">Salvar Alterações</span>
+                        <span id="saveLoading" class="loading" style="display: none;"></span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Info Card -->
+            <div class="info-card">
+                <h2 class="card-title">Informações do Aventureiro</h2>
+                
+                <div class="form-group">
+                    <label class="form-label">Nome Completo</label>
+                    <input type="text" class="form-input" id="inputName" placeholder="Seu nome na taverna">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="inputEmail" placeholder="seu@email.com" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">CPF</label>
+                    <input type="text" class="form-input" id="inputCpf" placeholder="000.000.000-00" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Data de Nascimento</label>
+                    <input type="text" class="form-input" id="inputDataNascimento" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Data de Entrada na Taverna</label>
+                    <input type="text" class="form-input" id="inputCreatedAt" readonly>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   <script>
+    console.log('Token:', getToken());
+console.log('User ID:', getUserId());
+
+  const API_BASE = 'http://127.0.0.1:8000/api';
+
+const elements = {
+    userName: document.getElementById('userName'),
+    userRole: document.getElementById('userRole'),
+    inputName: document.getElementById('inputName'),
+    inputEmail: document.getElementById('inputEmail'),
+    inputCpf: document.getElementById('inputCpf'),
+    inputDataNascimento: document.getElementById('inputDataNascimento'),
+    inputCreatedAt: document.getElementById('inputCreatedAt'),
+    avatarImage: document.getElementById('avatarImage'),
+    avatarPlaceholder: document.getElementById('avatarPlaceholder'),
+    avatarGrid: document.getElementById('avatarGrid'),
+    saveText: document.getElementById('saveText'),
+    saveLoading: document.getElementById('saveLoading')
+};
+
+let selectedAvatar = null;
+let currentAvatar = null;
+
+// Função para obter token do cookie
+function getUserId() {
+    const match = document.cookie.match(/user_id=([^;]+)/);
+    return match ? match[1] : null;
+}
+
+function getToken() {
+    const match = document.cookie.match(/token=([^;]+)/);
+    return match ? match[1] : null;
+}
+
+
+// Configura headers AJAX incluindo Authorization e User-ID
+function setupAjax() {
+    const token = getToken();
+    const userId = getUserId();
+
+    if (token && userId) {
+        $.ajaxSetup({
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'User-ID': userId
+            }
+        });
+    } else {
+        console.warn('Token ou User ID não encontrados nos cookies.');
+    }
+}
+
+setupAjax();
+
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    toast.style.background = type === 'error' ? '#dc2626' : '#f2a900';
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+
+function loadUserData() {
+    const token = getToken();
+    const userId = getUserId();
+
+    if (!token || !userId) {
+        showToast('Faça login para acessar o perfil', 'error');
+        setTimeout(() => window.location.href = 'login.html', 2000);
+        return;
+    }
+
+    $.ajax({
+        url: `${API_BASE}/user`,
+        method: 'GET',
+        data: {
+            'token': token,
+            'user_id':userId
+        },
+        success: function (data) {
+            console.log('Dados recebidos do perfil:', data);
+
+            // Atualiza a UI com os dados do usuário
+            elements.userName.textContent = data.name || 'Aventureiro';
+            elements.inputName.value = data.name || '';
+            elements.inputEmail.value = data.email || '';
+            elements.inputCpf.value = data.cpf || 'Não informado';
+            elements.inputDataNascimento.value = data.data_nascimento ?
+                new Date(data.data_nascimento).toLocaleDateString('pt-BR') : 'Não informada';
+            elements.inputCreatedAt.value = data.created_at ?
+                new Date(data.created_at).toLocaleDateString('pt-BR') : 'Data não disponível';
+
+            currentAvatar = data.foto;
+            if (data.foto) {
+                elements.avatarImage.src = data.foto;
+                elements.avatarImage.style.display = 'block';
+                elements.avatarPlaceholder.style.display = 'none';
+            } else {
+                elements.avatarImage.style.display = 'none';
+                elements.avatarPlaceholder.style.display = 'flex';
+                elements.avatarPlaceholder.textContent = data.name ?
+                    data.name.charAt(0).toUpperCase() : '🧙';
+            }
+
+            loadAvatares();
+            showToast('Perfil carregado com sucesso!');
+        },
+        error: function (xhr) {
+            console.log(xhr);
+            const response = xhr.responseJSON;
+            if (response?.guest) {
+                showToast('Usuário não autenticado', 'error');
+                setTimeout(() => window.location.href = 'login.html', 2000);
+                return;
+            }
+            showToast(response?.message || 'Erro ao carregar perfil', 'error');
+        }
+    });
+}
+
+
+
+function loadAvatares() {
+    $.ajax({
+        url: `${API_BASE}/avatares`,
+        method: 'GET',
+        success: function (data) {
+            if (data.avatares) {
+                displayAvatares(data.avatares);
+            }
+        },
+        error: function (xhr) {
+            console.error('Erro ao carregar avatares:', xhr);
+        }
+    });
+}
+
+function displayAvatares(avatares) {
+    elements.avatarGrid.innerHTML = '';
+
+    Object.entries(avatares).forEach(([avatarKey, avatarUrl]) => {
+        const avatarOption = document.createElement('img');
+        avatarOption.className = 'avatar-option';
+        avatarOption.src = avatarUrl;
+        avatarOption.alt = avatarKey;
+        avatarOption.title = avatarKey.replace('avatar_', '').replace('_', ' ');
+
+        if (currentAvatar && currentAvatar.includes(avatarKey)) {
+            avatarOption.classList.add('selected');
+            selectedAvatar = avatarKey;
+        }
+
+        avatarOption.addEventListener('click', () => {
+            document.querySelectorAll('.avatar-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+
+            avatarOption.classList.add('selected');
+            selectedAvatar = avatarKey;
+            elements.avatarImage.src = avatarUrl;
+            elements.avatarImage.style.display = 'block';
+            elements.avatarPlaceholder.style.display = 'none';
+        });
+
+        elements.avatarGrid.appendChild(avatarOption);
+    });
+}
+
+function updateProfile() {
+    const token = getToken();
+    const userId = getUserId();
+
+    if (!token || !userId) {
+        showToast('Faça login para atualizar o perfil', 'error');
+        return;
+    }
+
+    elements.saveText.style.display = 'none';
+    elements.saveLoading.style.display = 'inline-block';
+
+    let updatesMade = false;
+    const currentName = elements.userName.textContent;
+    const newName = elements.inputName.value.trim();
+
+    const promises = [];
+
+    // Atualizar nome
+    if (newName && newName !== currentName) {
+        promises.push($.ajax({
+            url: `${API_BASE}/user/nome`,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ name: newName }),
+            success: function () {
+                elements.userName.textContent = newName;
+                updatesMade = true;
+            },
+            error: function (xhr) {
+                const response = xhr.responseJSON;
+                showToast(response?.message || 'Erro ao atualizar nome', 'error');
+            }
+        }));
+    }
+
+    // Atualizar avatar
+    if (selectedAvatar && selectedAvatar !== currentAvatar) {
+        promises.push($.ajax({
+            url: `${API_BASE}/user/avatar`,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ avatar: selectedAvatar }),
+            success: function () {
+                currentAvatar = selectedAvatar;
+                updatesMade = true;
+            },
+            error: function (xhr) {
+                const response = xhr.responseJSON;
+                showToast(response?.message || 'Erro ao atualizar avatar', 'error');
+            }
+        }));
+    }
+
+    $.when(...promises).always(function () {
+        if (updatesMade) {
+            showToast('Perfil atualizado com sucesso!');
+        } else {
+            showToast('Nenhuma alteração foi feita.');
+        }
+
+        elements.saveText.style.display = 'inline';
+        elements.saveLoading.style.display = 'none';
+    });
+}
+
+// Logout
+$('#logoutBtn').on('click', function () {
+    const token = getToken();
+
+    if (token) {
+        $.ajax({
+            url: `${API_BASE}/logout`,
+            method: 'POST'
+        });
+    }
+
+    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    document.cookie = "user_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+    showToast('Até mais, aventureiro!');
+    setTimeout(() => {
+        window.location.href = 'login.html';
+    }, 1500);
+});
+
+// Inicializar
+$(document).ready(function () {
+    const token = getToken();
+    const userId = getUserId();
+
+    if (!token || !userId) {
+        showToast('Faça login para acessar o perfil', 'error');
+        setTimeout(() => window.location.href = 'login.html', 2000);
+        return;
+    }
+
+    setupAjax();
+    loadUserData();
+});
+
+
+</script>
+
+</body>
+</html>

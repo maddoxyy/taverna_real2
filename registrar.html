@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Registrar | Taverna</title>
+  <style>
+    :root {
+      --dourado: #f2a900;
+      --laranja: #f4a261;
+      --cinza-escuro: #1f2027;
+      --cinza-medio: #2c2d31;
+      --vidro: rgba(44, 45, 49, 0.7);
+      --vidro-escuro: rgba(31, 32, 39, 0.95);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at center, #1f2027 0%, #131417 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: white;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+      background: var(--vidro);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(15px);
+      border-radius: 20px;
+      padding: 40px 35px;
+      box-shadow: 0 0 50px rgba(0, 0, 0, 0.6);
+      text-align: center;
+      animation: fadeIn 0.8s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    h2 {
+      color: var(--dourado);
+      font-size: 2em;
+      margin-bottom: 25px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="date"] {
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background-color: #3a3b3f;
+      color: #fff;
+      font-size: 1em;
+      transition: 0.3s;
+      width: 100%;
+    }
+
+    input:focus {
+      outline: none;
+      background-color: #4a4d52;
+      border: 1px solid var(--dourado);
+    }
+
+    input::placeholder {
+      color: #cfcfcf;
+    }
+
+    label {
+      text-align: left;
+      font-size: 0.9em;
+    }
+
+    .checkbox {
+      display: flex;
+      align-items: flex-start;
+      font-size: 0.85em;
+      text-align: left;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    button {
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(to right, var(--dourado), var(--laranja));
+      color: var(--cinza-escuro);
+      font-size: 1em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    button:hover {
+      transform: scale(1.03);
+    }
+
+    p {
+      margin-top: 20px;
+      font-size: 0.9em;
+    }
+
+    a {
+      color: var(--dourado);
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+
+    a:hover {
+      text-decoration: underline;
+      opacity: 0.9;
+    }
+
+    .erro {
+      color: #ff6060;
+      font-size: 0.85em;
+      margin-top: -10px;
+    }
+
+    .is-invalid {
+      border: 1px solid #ff6060 !important;
+    }
+
+    /* Campo de senha com ícone de mostrar/ocultar */
+    .password-container {
+      position: relative;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #cfcfcf;
+      cursor: pointer;
+      font-size: 1.2em;
+      padding: 0;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .toggle-password:hover {
+      color: var(--dourado);
+    }
+
+    /* Modal de Termos */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--vidro-escuro);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-container {
+      background: var(--cinza-escuro);
+      border-radius: 20px;
+      border: 1px solid var(--dourado);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      padding: 30px;
+      overflow-y: auto;
+      transform: scale(0.9);
+      transition: all 0.3s ease;
+    }
+
+    .modal-overlay.active .modal-container {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .modal-header h2 {
+      color: var(--dourado);
+      font-size: 1.8em;
+      margin: 0;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--dourado);
+      font-size: 1.5em;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+
+    .modal-close:hover {
+      transform: rotate(90deg);
+    }
+
+    .modal-content {
+      text-align: left;
+      line-height: 1.6;
+    }
+
+    .modal-content p {
+      margin-bottom: 15px;
+    }
+
+    .modal-content ul {
+      margin: 20px 0;
+      padding-left: 20px;
+    }
+
+    .modal-content li {
+      margin-bottom: 12px;
+      position: relative;
+      padding-left: 30px;
+    }
+
+    .modal-content li:before {
+      content: "•";
+      color: var(--dourado);
+      font-size: 1.5em;
+      position: absolute;
+      left: 0;
+      top: -5px;
+    }
+
+    .modal-footer {
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .modal-btn {
+      padding: 12px 30px;
+      background: var(--dourado);
+      color: var(--cinza-escuro);
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .modal-btn:hover {
+      background: var(--laranja);
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 30px 25px;
+      }
+
+      h2 {
+        font-size: 1.6em;
+      }
+
+      .modal-container {
+        padding: 20px;
+      }
+
+      .modal-header h2 {
+        font-size: 1.5em;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Crie sua conta</h2>
+    <form id="registerForm">
+      <input type="text" id="name" name="name" placeholder="Nome completo" required>
+      <input type="email" id="email" name="email" placeholder="Email" required>
+      <input type="text" id="cpf" name="cpf" placeholder="CPF" required maxlength="14">
+      
+      <div class="password-container">
+        <input type="password" id="password" name="password" placeholder="Senha" required>
+        <button type="button" class="toggle-password" id="togglePassword">
+          <i class="fa fa-eye"></i>
+        </button>
+      </div>
+      
+      <div class="password-container">
+        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirmar senha" required>
+        <button type="button" class="toggle-password" id="toggleConfirmPassword">
+          <i class="fa fa-eye"></i>
+        </button>
+      </div>
+
+      <label for="nascimento">Data de nascimento:</label>
+      <input type="date" id="nascimento" name="data_nascimento" required>
+
+      <div class="checkbox">
+        <input type="checkbox" id="termos" required>
+        <label for="termos">
+          Declaro que sou maior de 18 anos, li e concordo com os <a href="#" onclick="mostrarTermos()">Termos e Condições</a> deste site.
+        </label>
+      </div>
+
+      <div class="erro" id="erroIdade" style="display: none;">Você deve ter 18 anos ou mais para se registrar.</div>
+
+      <button type="submit">Registrar</button>
+    </form>
+    <p>Já tem uma conta? <a href="login.html">Entrar</a></p>
+  </div>
+
+  <div class="modal-overlay" id="termosModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2> 🍻 Termos e Condições da Taverna</h2>
+        <button class="modal-close" onclick="fecharTermos()">&times;</button>
+      </div>
+      <div class="modal-content">
+        <p>Bem-vindo à Taverna! Ao criar uma conta em nosso sistema, você concorda com os seguintes termos e condições:</p>
+        
+        <ul>
+          <li><strong>Idade Mínima:</strong> Este serviço é exclusivo para maiores de 18 anos. O fornecimento de informações falsas sobre idade é estritamente proibido e resultará na suspensão imediata da conta.</li>
+          
+          <li><strong>Consumo Responsável:</strong> A Taverna promove o consumo moderado de bebidas alcoólicas. Não nos responsabilizamos por consequências decorrentes do uso indevido de álcool.</li>
+          
+          <li><strong>Privacidade e Segurança:</strong> Seus dados pessoais são armazenados com as mais modernas técnicas de segurança. O CPF fornecido será utilizado apenas para validação de idade e identidade, conforme exigido por lei.</li>
+          
+          <li><strong>Uso Adequado:</strong> Você concorda em utilizar este sistema apenas para fins legítimos de gerenciamento de adega pessoal ou comercial autorizada.</li>
+          
+          <li><strong>Propriedade Intelectual:</strong> Todo o conteúdo e funcionalidades da Taverna são protegidos por direitos autorais e não podem ser reproduzidos sem autorização.</li>
+          
+          <li><strong>Responsabilidades:</strong> A Taverna não se responsabiliza por informações incorretas fornecidas por usuários ou por danos decorrentes do uso inadequado do sistema.</li>
+        </ul>
+        
+        <p>Ao marcar a caixa de concordância, você confirma que leu, compreendeu e aceita integralmente estes Termos e Condições, bem como nossa Política de Privacidade.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn" onclick="fecharTermos()">Entendi e Concordo</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+  <script>
+    // Funções para mostrar e fechar os termos
+    function mostrarTermos() {
+      event.preventDefault();
+      document.getElementById('termosModal').classList.add('active');
+    }
+
+    function fecharTermos() {
+      document.getElementById('termosModal').classList.remove('active');
+    }
+
+    // Função para obter cookies
+    function getCookie(nome) {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+          const c = cookies[i].trim();
+          if (c.indexOf(nome + "=") === 0) {
+              return c.substring((nome + "=").length, c.length);
+          }
+      }
+      return null;
+    }
+
+    // Função para fazer login automático após registro
+    function fazerLogin(email, senha) {
+      $.ajax({
+        url: "http://127.0.0.1:8000/api/login",
+        method: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({
+          email: email,
+          password: senha
+        }),
+        success: function(response) {
+          if (response.user && response.user.token) {
+            console.log(response.user);
+            
+            // Salvar token e user_id nos cookies
+            document.cookie = "token=" + response.user.token + "; path=/; max-age=3600";
+            document.cookie = "user_id=" + response.user.id + "; path=/; max-age=3600";
+            
+            console.log("🍪 Cookies do servidor:", document.cookie);
+            
+            // Redirecionar para welcome.html após 2 segundos
+            setTimeout(() => {
+              window.location.href = 'welcome.html';
+            }, 2000);
+            
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: "Erro no login automático",
+              text: 'Token não encontrado na resposta.'
+            });
+          }
+        },
+        error: function(xhr) {
+          const res = xhr.responseJSON;
+          let mensagemErro = 'Erro ao fazer login automático.';
+          
+          if (res && res.message) {
+            mensagemErro = res.message;
+          }
+          
+          Swal.fire({
+            icon: "error",
+            title: "Erro no login",
+            text: mensagemErro
+          });
+        }
+      });
+    }
+
+    $(document).ready(function() {
+      // Fechar modal ao clicar fora
+      $(document).on('click', function(e) {
+        if ($(e.target).hasClass('modal-overlay')) {
+          fecharTermos();
+        }
+      });
+
+      // Máscara para CPF
+      $('#cpf').on('input', function() {
+        let cpf = $(this).val().replace(/\D/g, '');
+        
+        if (cpf.length > 11) {
+          cpf = cpf.substring(0, 11);
+        }
+        
+        if (cpf.length <= 11) {
+          cpf = cpf.replace(/(\d{3})(\d)/, '$1.$2');
+          cpf = cpf.replace(/(\d{3})(\d)/, '$1.$2');
+          cpf = cpf.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        }
+        
+        $(this).val(cpf);
+      });
+
+      // Toggle para mostrar/ocultar senha
+      $('#togglePassword').on('click', function() {
+        const passwordInput = $('#password');
+        const type = passwordInput.attr('type') === 'password' ? 'text' : 'password';
+        passwordInput.attr('type', type);
+        
+        // Alternar ícone
+        $(this).find('i').toggleClass('fa-eye fa-eye-slash');
+      });
+
+      // Toggle para mostrar/ocultar confirmação de senha
+      $('#toggleConfirmPassword').on('click', function() {
+        const confirmPasswordInput = $('#confirmPassword');
+        const type = confirmPasswordInput.attr('type') === 'password' ? 'text' : 'password';
+        confirmPasswordInput.attr('type', type);
+        
+        // Alternar ícone
+        $(this).find('i').toggleClass('fa-eye fa-eye-slash');
+      });
+
+      // Validar email
+      function validarEmail(email) {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(email);
+      }
+
+      // Validar idade (18 anos ou mais)
+      function validarIdade(dataNascimento) {
+        const hoje = new Date();
+        const nascimento = new Date(dataNascimento);
+        let idade = hoje.getFullYear() - nascimento.getFullYear();
+        const mes = hoje.getMonth() - nascimento.getMonth();
+        
+        if (mes < 0 || (mes === 0 && hoje.getDate() < nascimento.getDate())) {
+          idade--;
+        }
+        
+        return idade >= 18;
+      }
+
+      // Form submission
+      $("#registerForm").submit(function(e) {
+        e.preventDefault();
+
+        // Obter valores dos campos
+        const nome = $("#name").val().trim();
+        const email = $("#email").val().trim();
+        const cpf = $("#cpf").val().replace(/\D/g, "");
+        const nascimento = $("#nascimento").val();
+        const senha = $("#password").val();
+        const confirmaSenha = $("#confirmPassword").val();
+        const aceitouTermos = $("#termos").is(":checked");
+
+        let temErro = false;
+
+        // Resetar classes de erro
+        $("input").removeClass("is-invalid");
+
+        // Validar campos
+        if (!nome) {
+          $("#name").addClass("is-invalid");
+          temErro = true;
+        }
+
+        if (!email || !validarEmail(email)) {
+          $("#email").addClass("is-invalid");
+          temErro = true;
+        }
+
+        if (!/^\d{11}$/.test(cpf)) {
+          $("#cpf").addClass("is-invalid");
+          temErro = true;
+        }
+
+        if (!nascimento) {
+          $("#nascimento").addClass("is-invalid");
+          temErro = true;
+        } else if (!validarIdade(nascimento)) {
+          $("#nascimento").addClass("is-invalid");
+          $("#erroIdade").show();
+          Swal.fire({
+            icon: "error",
+            title: "Idade inválida",
+            text: "Você precisa ter 18 anos ou mais para se registrar."
+          });
+          temErro = true;
+        } else {
+          $("#erroIdade").hide();
+        }
+
+        if (!senha || senha.length < 6) {
+          $("#password").addClass("is-invalid");
+          temErro = true;
+        }
+
+        if (senha !== confirmaSenha) {
+          $("#confirmPassword").addClass("is-invalid");
+          Swal.fire({
+            icon: "error",
+            title: "Senhas não coincidem",
+            text: "Por favor, digite a mesma senha novamente."
+          });
+          temErro = true;
+        }
+
+        if (!aceitouTermos) {
+          Swal.fire({
+            icon: "error",
+            title: "Aceite os termos",
+            text: "Você precisa aceitar os termos para continuar."
+          });
+          temErro = true;
+        }
+
+        if (temErro) return;
+
+        // Dados para enviar à API
+        const dadosRegistro = {
+          name: nome,
+          email: email,
+          cpf: cpf,
+          data_nascimento: nascimento,
+          password: senha,
+          password_confirmation: confirmaSenha
+        };
+
+        // Enviar para a API
+        $.ajax({
+          url: "http://127.0.0.1:8000/api/registrar",
+          method: "POST",
+          contentType: "application/json",
+          data: JSON.stringify(dadosRegistro),
+          success: function(resposta) {
+            Swal.fire({
+              icon: "success",
+              title: "Cadastro realizado!",
+              text: resposta.message || "Fazendo login automático...",
+              timer: 2000,
+              showConfirmButton: false
+            }).then(() => {
+              // Fazer login automático após registro bem-sucedido
+              fazerLogin(email, senha);
+            });
+          },
+          error: function(xhr) {
+            let mensagemErro = "Não foi possível registrar. Tente novamente.";
+            
+            if (xhr.responseJSON && xhr.responseJSON.errors) {
+              // Processar erros de validação do Laravel
+              const erros = xhr.responseJSON.errors;
+              mensagemErro = "";
+              
+              for (const campo in erros) {
+                if (erros.hasOwnProperty(campo)) {
+                  mensagemErro += erros[campo][0] + "\n";
+                  $(`#${campo}`).addClass("is-invalid");
+                }
+              }
+            } else if (xhr.responseJSON && xhr.responseJSON.message) {
+              mensagemErro = xhr.responseJSON.message;
+            }
+            
+            Swal.fire({
+              icon: "error",
+              title: "Ops...",
+              text: mensagemErro
+            });
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

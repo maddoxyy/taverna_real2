@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Taverna | Produto</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --cinza-escuro: #313c49;
+            --dourado: #f2a900;
+            --laranja: #f4a261;
+            --cinza-claro: #d9d9d9;
+            --card-bg: rgba(63, 74, 101, 0.85);
+            --card-shadow: rgba(0,0,0,0.4);
+            --nav-bg-default: transparent;
+            --nav-bg-scrolled: #222831;
+            --nav-link-default: var(--cinza-claro);
+            --nav-link-scrolled: var(--dourado);
+            --transition-slow: 0.5s ease;
+            --transition-fast: 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--cinza-escuro), #1f2027);
+            color: var(--cinza-claro);
+            padding: 60px 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background-color: var(--nav-bg-default);
+            transition: background-color var(--transition-fast), box-shadow var(--transition-fast);
+            z-index: 1000;
+        }
+
+        header.scrolled {
+            background-color: var(--nav-bg-scrolled);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.7);
+        }
+
+        .logo {
+            height: 100px;
+            transform: scale(1.3);
+            transform-origin: left;
+            transition: filter var(--transition-fast);
+        }
+
+        header.scrolled .logo {
+            filter: brightness(0.9);
+        }
+
+        nav a {
+            color: var(--nav-link-default);
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 500;
+            transition: color var(--transition-fast);
+        }
+
+        header.scrolled nav a {
+            color: var(--nav-link-scrolled);
+        }
+
+        nav a:hover {
+            color: var(--dourado);
+        }
+
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            padding: 140px 20px 40px;
+            width: 100%;
+        }
+        
+        h1 {
+            font-size: 3em;
+            background: linear-gradient(90deg, var(--dourado), var(--laranja));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+            text-align: center;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.4);
+            animation: fadeDown 1s ease-in-out;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            width: 100%;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(242, 169, 0, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--dourado);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .produto-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 60px;
+            opacity: 0;
+            animation: fadeUp 0.8s forwards;
+            animation-delay: 0.5s;
+        }
+
+        .produto-imagem-container {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .produto-imagem-principal {
+            width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: transform var(--transition-fast);
+        }
+
+        .produto-imagem-principal:hover {
+            transform: scale(1.02);
+        }
+
+        .produto-info-container {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .produto-nome {
+            font-size: 2.2em;
+            color: var(--dourado);
+            margin-bottom: 10px;
+        }
+
+        .produto-preco {
+            font-size: 2.5em;
+            color: white;
+            margin: 25px 0;
+            font-weight: 700;
+        }
+
+        .produto-descricao {
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .produto-acoes {
+            display: flex;
+            gap: 15px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .btn-primario {
+            background: linear-gradient(to right, var(--dourado), var(--laranja));
+            color: var(--cinza-escuro);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-size: 1em;
+        }
+
+        .btn-primario:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(242, 169, 0, 0.4);
+        }
+
+        .quantidade-controle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-right: 15px;
+        }
+
+        .quantidade-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+            border: none;
+            font-size: 1.2em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quantidade-btn:hover {
+            background-color: var(--dourado);
+            color: var(--cinza-escuro);
+        }
+
+        .quantidade-valor {
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .footer {
+            background-color: #1c1e24;
+            color: #d9d9d9;
+            padding: 60px 20px 30px;
+            width: 102%;
+            margin-top: auto;
+        }
+
+        .footer-container {
+            display: flex;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin: auto;
+            justify-content: space-between;
+            gap: 40px;
+        }
+
+        .footer-col {
+            flex: 1 1 220px;
+        }
+
+        .footer h3 {
+            color: var(--dourado);
+            margin-bottom: 20px;
+            font-size: 1.4em;
+        }
+
+        .footer p, .footer li {
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .footer ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer a {
+            color: #d9d9d9;
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        .footer a:hover {
+            color: var(--laranja);
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .social-icons img {
+            width: 24px;
+            height: 24px;
+            filter: brightness(0) invert(1);
+            transition: transform var(--transition-fast);
+        }
+
+        .social-icons a:hover img {
+            transform: scale(1.2);
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2em;
+            }
+            .produto-nome {
+                font-size: 1.8em;
+            }
+            .produto-preco {
+                font-size: 2em;
+            }
+            .produto-acoes {
+                flex-direction: column;
+            }
+            .quantidade-controle {
+                justify-content: center;
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <img src="taverna logo v3.svg" alt="Logo Taverna" class="logo" />
+        <nav>
+            <a href="welcome.html">Início</a>
+            <a href="catalogo.html">Catálogo</a>
+            <a href="estoque.html">Estoque</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="perfil.html">Perfil</a>
+            <a href="carrinho.html" title="Meu Carrinho">
+                <i class="fas fa-shopping-cart"></i>
+            </a>
+        </nav>
+    </header>
+
+    <div class="hero">
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Carregando produto...</p>
+        </div>
+        
+        <div class="produto-container" id="produto-container" style="display: none;">
+            <div class="produto-imagem-container">
+                <img src="" alt="Imagem do Produto" class="produto-imagem-principal" id="imagemPrincipal">
+            </div>
+
+            <div class="produto-info-container">
+                <h1 class="produto-nome" id="produto-nome"></h1>
+                
+                <div class="produto-meta">
+                    <span class="produto-meta-item">
+                        <i class="fas fa-box-open"></i> <span id="produto-estoque"></span> em estoque
+                    </span>
+                </div>
+
+                <div class="produto-preco" id="produto-preco"></div>
+                
+                <p class="produto-descricao" id="produto-descricao"></p>
+
+                <div class="produto-acoes">
+                    <div class="quantidade-controle">
+                        <button class="quantidade-btn" onclick="alterarQuantidade(-1)">-</button>
+                        <span class="quantidade-valor" id="quantidade">1</span>
+                        <button class="quantidade-btn" onclick="alterarQuantidade(1)">+</button>
+                    </div>
+                    
+                   <button class="btn-primario" onclick="adicionarAoCarrinho()">Adicionar ao Carrinho</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-col">
+                <h3>Sobre a Taverna</h3>
+                <p>
+                    A Taverna é uma plataforma moderna para gerenciamento de adegas, unindo tradição e tecnologia. Organize, catalogue e controle sua coleção de bebidas com elegância e praticidade.
+                </p>
+            </div>
+
+            <div class="footer-col">
+                <h3>Links Rápidos</h3>
+                <ul>
+                    <li><a href="welcome.html">Início</a></li>
+                    <li><a href="#sobre">Sobre</a></li>
+                    <li><a href="catalogo.html">Catálogo</a></li>
+                    <li><a href="#footer">Contato</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h3>Siga-nos</h3>
+                <div class="social-icons">
+                    <a href="#"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/instagram.svg" alt="Instagram"></a>
+                    <a href="#"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/facebook.svg" alt="Facebook"></a>
+                    <a href="#"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/twitter.svg" alt="Twitter"></a>
+                    <a href="#"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/github.svg" alt="GitHub"></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+  <script>
+    // DOM Elements
+    const loadingElement = document.getElementById('loading');
+    const produtoContainer = document.getElementById('produto-container');
+    const imagemPrincipal = document.getElementById('imagemPrincipal');
+    const produtoNome = document.getElementById('produto-nome');
+    const produtoEstoque = document.getElementById('produto-estoque');
+    const produtoPreco = document.getElementById('produto-preco');
+    const produtoDescricao = document.getElementById('produto-descricao');
+    const quantidadeValor = document.getElementById('quantidade');
+
+    function getCookie(nome) {
+            const cookies = document.cookie.split(";");
+            for (let i = 0; i < cookies.length; i++) {
+                const c = cookies[i].trim();
+                if (c.indexOf(nome + "=") === 0) {
+                    return c.substring((nome + "=").length, c.length);
+                }
+            }
+            return null;
+        }
+
+        // Função para exibir todos os cookies na página
+        function displayCookies() {
+            const cookieContainer = document.getElementById("cookieContainer");
+            const cookies = document.cookie.split(";");
+            
+            if (cookies.length === 0 || (cookies.length === 1 && cookies[0] === "")) {
+                cookieContainer.innerHTML = "<div class='cookie-item'>Nenhum cookie encontrado.</div>";
+                return;
+            }
+            
+            cookieContainer.innerHTML = "";
+            cookies.forEach(cookie => {
+                const cookieItem = document.createElement("div");
+                cookieItem.className = "cookie-item";
+                cookieItem.textContent = cookie.trim();
+                cookieContainer.appendChild(cookieItem);
+            });
+        }
+
+        // Função principal para verificar autenticação
+        function checkAuth() {
+            console.clear();
+            console.log("=== VERIFICAÇÃO DE TOKEN E COOKIES ===");
+            
+            // Recupera cookies
+            const userId = getCookie("user_id");
+            const token = getCookie("token");
+            
+            // Exibe no console
+            console.log("🔍 Cookies recuperados:");
+            console.log("user_id:", userId);
+            console.log("token:", token);
+            
+            // Exibe todos os cookies disponíveis
+            console.log("🍪 Todos os cookies:", document.cookie);
+            
+            if (token) {
+                console.log("✅ Token encontrado! Usuário potencialmente autenticado.");
+            } else {
+                console.log("❌ Nenhum token encontrado. Usuário não autenticado.");
+            }
+            
+            // Atualiza a exibição de cookies na página
+            displayCookies();
+        }
+
+        // Executa automaticamente quando a página carrega
+        window.onload = function() {
+            console.log("Página carregada. Use o botão para verificar token e cookies.");
+            displayCookies();
+        };
+
+    let maxEstoque = 1;
+    let precoProduto = 0;
+    let produtoCarregado = null;
+
+    // Configurações da API
+    const CARRINHO_API_URL = 'http://127.0.0.1:8000/api/carrinho';
+
+    // Função para obter o token CSRF
+    function getCsrfToken() {
+        const metaTag = document.querySelector('meta[name="csrf-token"]');
+        return metaTag ? metaTag.content : '';
+    }
+
+    // Função para obter o ID do produto da URL
+    function getProductIdFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('id');
+    }
+
+    // Função para carregar os dados do produto da API
+    async function carregarProduto() {
+        const produtoId = getProductIdFromUrl();
+        if (!produtoId) {
+            loadingElement.innerHTML = '<p style="color:red;">ID do produto não encontrado na URL.</p>';
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('auth_token');
+            const headers = {};
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+                headers['Accept'] = 'application/json';
+            }
+
+            const response = await fetch(`http://127.0.0.1:8000/api/produtos/${produtoId}`, { headers });
+            
+            if (!response.ok) {
+                throw new Error('Produto não encontrado.');
+            }
+            
+            produtoCarregado = await response.json();
+            
+            // Preenche os elementos do HTML com os dados da API
+            produtoNome.textContent = produtoCarregado.nome;
+            produtoEstoque.textContent = produtoCarregado.quantidade;
+            
+            // Armazena o preço do produto
+            precoProduto = parseFloat(produtoCarregado.preco_varejo || produtoCarregado.preco || 0);
+            produtoPreco.textContent = `R$ ${precoProduto.toFixed(2)}`;
+            
+            produtoDescricao.textContent = produtoCarregado.descricao || 'Sem descrição';
+            imagemPrincipal.src = produtoCarregado.imagem || 'https://via.placeholder.com/600x400?text=Sem+Imagem';
+            imagemPrincipal.alt = produtoCarregado.nome;
+            imagemPrincipal.onerror = function() {
+                this.src = 'https://via.placeholder.com/600x400?text=Imagem+Não+Encontrada';
+            };
+
+            // Define o estoque máximo para o controle de quantidade
+            maxEstoque = produtoCarregado.quantidade || 1;
+            quantidadeValor.textContent = '1';
+
+            // Mostra o contêiner do produto e esconde o loading
+            loadingElement.style.display = 'none';
+            produtoContainer.style.display = 'flex';
+
+        } catch (error) {
+            console.error('Erro ao carregar produto:', error);
+            loadingElement.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #ff6b6b; margin-bottom: 20px;"></i>
+                    <h2 style="color: #ff6b6b; margin-bottom: 15px;">Erro ao carregar produto</h2>
+                    <p style="color: #ccc; margin-bottom: 25px;">${error.message}</p>
+                    <button onclick="carregarProduto()" style="background: var(--dourado); color: var(--cinza-escuro); border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                        <i class="fas fa-redo"></i> Tentar Novamente
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    // Função para controlar a quantidade do produto
+    function alterarQuantidade(valor) {
+        let quantidade = parseInt(quantidadeValor.textContent);
+        quantidade += valor;
+        
+        if (quantidade < 1) quantidade = 1;
+        if (quantidade > maxEstoque) quantidade = maxEstoque; 
+        
+        quantidadeValor.textContent = quantidade;
+        
+        // Atualizar visualmente o botão se a quantidade for máxima
+        const btnMais = document.querySelector('.quantidade-btn:last-child');
+        if (btnMais) {
+            btnMais.style.opacity = quantidade >= maxEstoque ? '0.5' : '1';
+            btnMais.style.cursor = quantidade >= maxEstoque ? 'not-allowed' : 'pointer';
+        }
+    }
+
+    // Função para adicionar item ao carrinho
+    function adicionarAoCarrinho() {
+        const produtoId = getProductIdFromUrl();
+        const quantidade = parseInt(quantidadeValor.textContent);
+        
+        if (!produtoId) {
+            showError('ID do produto não encontrado!');
+            return;
+        }
+        
+        if (quantidade > maxEstoque) {
+            showError('Quantidade solicitada maior que o estoque disponível!');
+            return;
+        }
+        
+        console.log('Tentando adicionar produto:', { 
+            produto_id: produtoId, 
+            quantidade: quantidade
+        });
+        
+        // Mostrar loading no botão
+        const btn = document.querySelector('.btn-primario');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<div class="loading"></div> Adicionando...';
+        btn.disabled = true;
+        
+        // Obter token CSRF
+        const csrfToken = getCsrfToken();
+        
+        // Fazer requisição AJAX
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', CARRINHO_API_URL + '/adicionar', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.setRequestHeader('Accept', 'application/json');
+        
+        // Adicionar CSRF token apenas se existir
+        if (csrfToken) {
+            xhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
+        }
+        
+        xhr.onload = function() {
+            // Restaurar botão
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            
+            console.log('Resposta do servidor - Status:', xhr.status);
+            console.log('Resposta do servidor - Texto:', xhr.responseText);
+            
+            if (xhr.status >= 200 && xhr.status < 300) {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        showSuccess('✅ Produto adicionado ao carrinho!');
+                        atualizarContadorCarrinho(quantidade);
+                        
+                        // Opcional: Redirecionar para o carrinho após 2 segundos
+                        setTimeout(() => {
+                            if (confirm('Produto adicionado! Deseja ver o carrinho?')) {
+                                window.location.href = 'carrinho.html';
+                            }
+                        }, 2000);
+                    } else {
+                        showError('❌ Erro: ' + (response.message || 'Erro desconhecido'));
+                    }
+                } catch (error) {
+                    console.error('Erro ao parsear JSON:', error, xhr.responseText);
+                    showError('❌ Erro ao processar resposta do servidor.');
+                }
+            } else if (xhr.status === 419) {
+                showError('🔁 Sessão expirada. Por favor, recarregue a página.');
+            } else if (xhr.status === 500) {
+                showError('⚙️ Erro interno do servidor. Tente novamente.');
+                console.error('Erro 500 - Detalhes:', xhr.responseText);
+            } else if (xhr.status === 404) {
+                showError('🔍 Endpoint da API não encontrado. Verifique a URL.');
+            } else {
+                showError('❌ Erro ao adicionar ao carrinho. Status: ' + xhr.status);
+            }
+        };
+        
+        xhr.onerror = function() {
+            // Restaurar botão
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            showError('🌐 Erro de conexão. Verifique sua internet.');
+            console.error('Erro de conexão - Servidor possivelmente offline');
+        };
+        
+        xhr.timeout = 15000;
+        xhr.ontimeout = function() {
+            // Restaurar botão
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            showError('⏰ Tempo de conexão esgotado. Servidor pode estar offline.');
+        };
+        
+        // Dados que a API espera (apenas produto_id e quantidade)
+        const data = JSON.stringify({
+            produto_id: parseInt(produtoId),
+            quantidade: quantidade
+        });
+        
+        console.log('Enviando dados para API:', data);
+        xhr.send(data);
+    }
+    
+    // Função para mostrar mensagem de sucesso
+    function showSuccess(message) {
+        // Criar toast de sucesso
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
+            z-index: 10000;
+            animation: slideInRight 0.4s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            border-left: 4px solid #2e7d32;
+        `;
+        
+        toast.innerHTML = `
+            <i class="fas fa-check-circle" style="font-size: 1.3em;"></i>
+            <span>${message}</span>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.animation = 'slideOutRight 0.4s ease';
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 400);
+        }, 3500);
+    }
+    
+    // Função para mostrar erro
+    function showError(message) {
+        // Criar toast de erro
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(244, 67, 54, 0.3);
+            z-index: 10000;
+            animation: slideInRight 0.4s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            border-left: 4px solid #c62828;
+        `;
+        
+        toast.innerHTML = `
+            <i class="fas fa-exclamation-circle" style="font-size: 1.3em;"></i>
+            <span>${message}</span>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.animation = 'slideOutRight 0.4s ease';
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 400);
+        }, 5000);
+    }
+    
+    // Função para atualizar contador do carrinho
+    function atualizarContadorCarrinho(quantidadeAdicionada) {
+        const linkCarrinho = document.querySelector('nav a[href="carrinho.html"]');
+        
+        if (linkCarrinho) {
+            let contadorCarrinho = linkCarrinho.querySelector('.cart-count');
+            
+            if (!contadorCarrinho) {
+                contadorCarrinho = document.createElement('span');
+                contadorCarrinho.className = 'cart-count';
+                contadorCarrinho.style.cssText = `
+                    background: linear-gradient(135deg, var(--dourado), var(--laranja));
+                    color: var(--cinza-escuro);
+                    border-radius: 50%;
+                    width: 22px;
+                    height: 22px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 0.75em;
+                    font-weight: bold;
+                    margin-left: 6px;
+                    box-shadow: 0 2px 8px rgba(242, 169, 0, 0.4);
+                `;
+                linkCarrinho.appendChild(contadorCarrinho);
+            }
+            
+            const count = parseInt(contadorCarrinho.textContent) || 0;
+            contadorCarrinho.textContent = count + quantidadeAdicionada;
+            
+            // Animação de pulse no contador
+            contadorCarrinho.style.animation = 'pulse 0.6s ease';
+            setTimeout(() => {
+                contadorCarrinho.style.animation = '';
+            }, 600);
+        }
+    }
+
+    // Adiciona um listener para o header
+    window.addEventListener('scroll', () => {
+        const header = document.querySelector('header');
+        if (window.scrollY > 50) {
+            header.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
+        }
+    });
+
+    // Inicializar a página
+    document.addEventListener('DOMContentLoaded', function() {
+        // Adicionar evento de clique ao botão
+        const btnAdicionar = document.querySelector('.btn-primario');
+        if (btnAdicionar) {
+            btnAdicionar.addEventListener('click', adicionarAoCarrinho);
+        }
+        
+        // Adicionar eventos aos botões de quantidade
+        const btnMenos = document.querySelector('.quantidade-btn:first-child');
+        const btnMais = document.querySelector('.quantidade-btn:last-child');
+        
+        if (btnMenos && btnMais) {
+            btnMenos.addEventListener('click', () => alterarQuantidade(-1));
+            btnMais.addEventListener('click', () => alterarQuantidade(1));
+        }
+        
+        // Adicionar estilos CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.2); }
+                100% { transform: scale(1); }
+            }
+            .loading {
+                display: inline-block;
+                width: 18px;
+                height: 18px;
+                border: 2px solid rgba(255,255,255,.3);
+                border-radius: 50%;
+                border-top-color: #fff;
+                animation: spin 1s ease-in-out infinite;
+            }
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
+            .btn-primario:disabled {
+                opacity: 0.7;
+                cursor: not-allowed;
+                transform: none !important;
+            }
+            .quantidade-btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Carregar o produto após um pequeno delay
+        setTimeout(carregarProduto, 100);
+    });
+
+    // Função para compartilhar produto
+    function compartilharProduto() {
+        if (navigator.share) {
+            navigator.share({
+                title: produtoCarregado?.nome || 'Produto Taverna',
+                text: produtoCarregado?.descricao || 'Confira este produto incrível!',
+                url: window.location.href
+            }).catch(() => {
+                showError('Navegador não suporta compartilhamento');
+            });
+        } else {
+            showError('Seu navegador não suporta compartilhamento');
+        }
+    }
+</script>
+</body>
+</html>
